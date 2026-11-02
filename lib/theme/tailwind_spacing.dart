@@ -1,7 +1,3 @@
-// Tailwind v4 spacing scale: --spacing = 0.25rem = 4px, step n = n * 4px.
-// Source: tailwindcss.com/docs/padding
-
-/// Tailwind spacing steps in logical pixels. `s1_5` is Tailwind's `1.5`.
 abstract final class TwSpacing {
   static const double s0 = 0;
   static const double px = 1;

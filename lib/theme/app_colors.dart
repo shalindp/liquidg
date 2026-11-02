@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'tailwind_colors.dart';
 
-/// Semantic colours, resolved per brightness from the Tailwind palette.
-/// Reach them with `context.colors` (see theme.dart).
 @immutable
 class AppColors extends ThemeExtension<AppColors> {
   const AppColors({
@@ -78,21 +76,20 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? danger,
     Color? success,
     Color? warning,
-  }) =>
-      AppColors(
-        background: background ?? this.background,
-        surface: surface ?? this.surface,
-        surfaceMuted: surfaceMuted ?? this.surfaceMuted,
-        border: border ?? this.border,
-        textPrimary: textPrimary ?? this.textPrimary,
-        textSecondary: textSecondary ?? this.textSecondary,
-        textOnAccent: textOnAccent ?? this.textOnAccent,
-        accent: accent ?? this.accent,
-        accentPressed: accentPressed ?? this.accentPressed,
-        danger: danger ?? this.danger,
-        success: success ?? this.success,
-        warning: warning ?? this.warning,
-      );
+  }) => AppColors(
+    background: background ?? this.background,
+    surface: surface ?? this.surface,
+    surfaceMuted: surfaceMuted ?? this.surfaceMuted,
+    border: border ?? this.border,
+    textPrimary: textPrimary ?? this.textPrimary,
+    textSecondary: textSecondary ?? this.textSecondary,
+    textOnAccent: textOnAccent ?? this.textOnAccent,
+    accent: accent ?? this.accent,
+    accentPressed: accentPressed ?? this.accentPressed,
+    danger: danger ?? this.danger,
+    success: success ?? this.success,
+    warning: warning ?? this.warning,
+  );
 
   @override
   AppColors lerp(AppColors? other, double t) {

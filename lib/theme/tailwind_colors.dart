@@ -1,10 +1,5 @@
-// GENERATED from tailwindcss.com/docs/colors (Tailwind v4 default palette).
-// Tailwind publishes oklch; values are converted to sRGB and gamut-clipped.
-// Do not edit by hand.
-
 import 'package:flutter/painting.dart';
 
-/// One Tailwind colour family, shades 50-950.
 class TwSwatch {
   const TwSwatch({
     required this.s50,
@@ -32,24 +27,22 @@ class TwSwatch {
   final Color s900;
   final Color s950;
 
-  /// Lookup by shade number (50, 100, ... 950).
   Color operator [](int shade) => switch (shade) {
-        50 => s50,
-        100 => s100,
-        200 => s200,
-        300 => s300,
-        400 => s400,
-        500 => s500,
-        600 => s600,
-        700 => s700,
-        800 => s800,
-        900 => s900,
-        950 => s950,
-        _ => throw ArgumentError.value(shade, 'shade'),
-      };
+    50 => s50,
+    100 => s100,
+    200 => s200,
+    300 => s300,
+    400 => s400,
+    500 => s500,
+    600 => s600,
+    700 => s700,
+    800 => s800,
+    900 => s900,
+    950 => s950,
+    _ => throw ArgumentError.value(shade, 'shade'),
+  };
 }
 
-/// Tailwind default colour palette.
 abstract final class TwColors {
   static const Color black = Color(0xFF000000);
   static const Color white = Color(0xFFFFFFFF);

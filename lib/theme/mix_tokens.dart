@@ -5,10 +5,6 @@ import 'app_colors.dart';
 import 'tailwind_radius.dart';
 import 'tailwind_spacing.dart';
 
-/// Mix design tokens. Use in stylers: `BoxStyler().color($background())`.
-/// Values come from [AppMixScope], which swaps them with the brightness.
-
-// Colours (semantic, dark/light aware).
 const $background = ColorToken('color.background');
 const $surface = ColorToken('color.surface');
 const $surfaceMuted = ColorToken('color.surfaceMuted');
@@ -22,7 +18,6 @@ const $danger = ColorToken('color.danger');
 const $success = ColorToken('color.success');
 const $warning = ColorToken('color.warning');
 
-// Spacing (Tailwind scale; name = Tailwind step).
 const $space1 = SpaceToken('space.1');
 const $space2 = SpaceToken('space.2');
 const $space3 = SpaceToken('space.3');
@@ -34,7 +29,6 @@ const $space10 = SpaceToken('space.10');
 const $space12 = SpaceToken('space.12');
 const $space16 = SpaceToken('space.16');
 
-// Radii (Tailwind scale).
 const $radiusSm = RadiusToken('radius.sm');
 const $radiusMd = RadiusToken('radius.md');
 const $radiusLg = RadiusToken('radius.lg');
@@ -43,7 +37,6 @@ const $radius2xl = RadiusToken('radius.2xl');
 const $radius3xl = RadiusToken('radius.3xl');
 const $radiusFull = RadiusToken('radius.full');
 
-/// Provides every token to the Mix widgets below it.
 class AppMixScope extends StatelessWidget {
   const AppMixScope({super.key, required this.child});
 
@@ -51,7 +44,8 @@ class AppMixScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Theme.of(context).extension<AppColors>() ??
+    final c =
+        Theme.of(context).extension<AppColors>() ??
         (Theme.brightnessOf(context) == Brightness.dark
             ? AppColors.dark
             : AppColors.light);

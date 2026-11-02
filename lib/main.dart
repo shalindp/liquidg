@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:hugeicons/hugeicons.dart';
+import 'package:phosphoricons_flutter/phosphoricons_flutter.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mix/mix.dart';
 
@@ -9,8 +9,6 @@ import 'theme/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Skia/GLES devices (e.g. OnePlus 3T): cheap no-shader glass.
-  // Impeller devices keep the full refraction shader.
   LiquidGlassEngine.liteGlassOnSkia = true;
   if (ui.ImageFilter.isShaderFilterSupported) {
     await LiquidGlassShaders.ensureLoaded();
@@ -18,7 +16,6 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-/// App-wide theme choice. Follows the system unless changed.
 final themeController = ThemeController();
 
 class MyApp extends StatelessWidget {
@@ -41,24 +38,15 @@ class MyApp extends StatelessWidget {
   }
 }
 
-LiquidGlassTabBarItem _tab(List<List<dynamic>> icon, String label) {
-  return LiquidGlassTabBarItem(
-    label: label,
-    iconBuilder: (context, glyph) => HugeIcon(
-      icon: icon,
-      color: glyph.color,
-      size: glyph.size,
-      // No solid set in the free pack: thicken the stroke when selected.
-      strokeWidth: glyph.selected ? 2.2 : 1.5,
-    ),
-  );
+LiquidGlassTabBarItem _tab(IconData icon, IconData filled, String label) {
+  return LiquidGlassTabBarItem(label: label, icon: icon, selectedIcon: filled);
 }
 
 final _tabs = <LiquidGlassTabBarItem>[
-  _tab(HugeIcons.strokeRoundedHome01, 'Home'),
-  _tab(HugeIcons.strokeRoundedCompass01, 'Explore'),
-  _tab(HugeIcons.strokeRoundedFavourite, 'Saved'),
-  _tab(HugeIcons.strokeRoundedUser, 'Profile'),
+  _tab(PhosphorIconsRegular.house, PhosphorIconsFill.house, 'Home'),
+  _tab(PhosphorIconsRegular.compass, PhosphorIconsFill.compass, 'Explore'),
+  _tab(PhosphorIconsRegular.heart, PhosphorIconsFill.heart, 'Saved'),
+  _tab(PhosphorIconsRegular.user, PhosphorIconsFill.user, 'Profile'),
 ];
 
 class HomeScreen extends StatefulWidget {
@@ -88,15 +76,15 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _index,
         onChanged: (i) => setState(() => _index = i),
         width: (width - 32).clamp(240, 420),
+        height: 68,
+        margin: const EdgeInsets.only(bottom: TwSpacing.s2),
         style: dark
             ? LiquidGlassTabBar.defaultDarkStyle
             : LiquidGlassTabBar.defaultStyle,
-        itemStyle: dark
-            ? LiquidGlassTabItemStyle(
-                selectedColor: LiquidGlassTabItemStyle.defaultSelectedDark,
-                unselectedColor: Colors.white,
-              )
-            : const LiquidGlassTabItemStyle(),
+        itemStyle: LiquidGlassTabItemStyle(
+          selectedColor: dark ? TwColors.white : TwColors.black,
+          unselectedColor: dark ? TwColors.zinc.s400 : TwColors.zinc.s600,
+        ),
       ),
     );
   }
@@ -119,7 +107,6 @@ class CardList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      // Room for glass app bar on top and tab bar at bottom.
       padding: const EdgeInsets.fromLTRB(
         TwSpacing.s4,
         TwSpacing.s24 - TwSpacing.s2,
