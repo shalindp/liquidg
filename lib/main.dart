@@ -1,10 +1,18 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mix/mix.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await LiquidGlassShaders.ensureLoaded();
+  // Skia/GLES devices (e.g. OnePlus 3T): cheap no-shader glass.
+  // Impeller devices keep the full refraction shader.
+  LiquidGlassEngine.liteGlassOnSkia = true;
+  if (ui.ImageFilter.isShaderFilterSupported) {
+    await LiquidGlassShaders.ensureLoaded();
+  }
   runApp(const MyApp());
 }
 
@@ -25,27 +33,24 @@ class MyApp extends StatelessWidget {
   }
 }
 
-const _tabs = <LiquidGlassTabBarItem>[
-  LiquidGlassTabBarItem(
-    icon: Icons.home_outlined,
-    selectedIcon: Icons.home_rounded,
-    label: 'Home',
-  ),
-  LiquidGlassTabBarItem(
-    icon: Icons.explore_outlined,
-    selectedIcon: Icons.explore_rounded,
-    label: 'Explore',
-  ),
-  LiquidGlassTabBarItem(
-    icon: Icons.favorite_border_rounded,
-    selectedIcon: Icons.favorite_rounded,
-    label: 'Saved',
-  ),
-  LiquidGlassTabBarItem(
-    icon: Icons.person_outline_rounded,
-    selectedIcon: Icons.person_rounded,
-    label: 'Profile',
-  ),
+LiquidGlassTabBarItem _tab(List<List<dynamic>> icon, String label) {
+  return LiquidGlassTabBarItem(
+    label: label,
+    iconBuilder: (context, glyph) => HugeIcon(
+      icon: icon,
+      color: glyph.color,
+      size: glyph.size,
+      // No solid set in the free pack: thicken the stroke when selected.
+      strokeWidth: glyph.selected ? 2.2 : 1.5,
+    ),
+  );
+}
+
+final _tabs = <LiquidGlassTabBarItem>[
+  _tab(HugeIcons.strokeRoundedHome01, 'Home'),
+  _tab(HugeIcons.strokeRoundedCompass01, 'Explore'),
+  _tab(HugeIcons.strokeRoundedFavourite, 'Saved'),
+  _tab(HugeIcons.strokeRoundedUser, 'Profile'),
 ];
 
 class HomeScreen extends StatefulWidget {
