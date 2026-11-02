@@ -5,6 +5,8 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:mix/mix.dart';
 
+import 'theme/theme.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // Skia/GLES devices (e.g. OnePlus 3T): cheap no-shader glass.
@@ -16,19 +18,25 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
+/// App-wide theme choice. Follows the system unless changed.
+final themeController = ThemeController();
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'UX App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0088FF)),
-        useMaterial3: true,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeController,
+      builder: (context, mode, _) => MaterialApp(
+        title: 'UX App',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: mode,
+        builder: (context, child) => AppMixScope(child: child!),
+        home: const HomeScreen(),
       ),
-      home: const HomeScreen(),
     );
   }
 }
@@ -66,8 +74,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
+    final dark = Theme.brightnessOf(context) == Brightness.dark;
     return LiquidGlassScaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: context.colors.background,
       appBar: LiquidGlassAppBar(
         title: Text(_tabs[_index].label!),
         width: width - 32,
@@ -79,6 +88,15 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedIndex: _index,
         onChanged: (i) => setState(() => _index = i),
         width: (width - 32).clamp(240, 420),
+        style: dark
+            ? LiquidGlassTabBar.defaultDarkStyle
+            : LiquidGlassTabBar.defaultStyle,
+        itemStyle: dark
+            ? LiquidGlassTabItemStyle(
+                selectedColor: LiquidGlassTabItemStyle.defaultSelectedDark,
+                unselectedColor: Colors.white,
+              )
+            : const LiquidGlassTabItemStyle(),
       ),
     );
   }
@@ -89,25 +107,30 @@ class CardList extends StatelessWidget {
 
   final int seed;
 
-  static const _palette = <Color>[
-    Color(0xFFFF6B6B),
-    Color(0xFFFFB84D),
-    Color(0xFF4ECDC4),
-    Color(0xFF5B8DEF),
-    Color(0xFFA06CD5),
-    Color(0xFFFF7EB6),
+  static final _palette = <Color>[
+    TwColors.red.s400,
+    TwColors.amber.s400,
+    TwColors.teal.s400,
+    TwColors.blue.s400,
+    TwColors.violet.s400,
+    TwColors.pink.s400,
   ];
 
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
       // Room for glass app bar on top and tab bar at bottom.
-      padding: const EdgeInsets.fromLTRB(16, 88, 16, 120),
+      padding: const EdgeInsets.fromLTRB(
+        TwSpacing.s4,
+        TwSpacing.s24 - TwSpacing.s2,
+        TwSpacing.s4,
+        TwSpacing.s28 + TwSpacing.s2,
+      ),
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
       ),
       itemCount: 20,
-      separatorBuilder: (_, _) => const SizedBox(height: 16),
+      separatorBuilder: (_, _) => const SizedBox(height: TwSpacing.s4),
       itemBuilder: (context, i) => PlaceholderCard(
         color: _palette[(i + seed) % _palette.length],
         title: 'Placeholder card ${i + 1}',
@@ -133,8 +156,8 @@ class PlaceholderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardStyle = BoxStyler()
         .height(120)
-        .padding(.all(16))
-        .borderRadius(.circular(24))
+        .padding(.all($space4()))
+        .borderRadius(.all($radius3xl()))
         .color(color)
         .onPressed(.color(color.withValues(alpha: 0.85)));
 

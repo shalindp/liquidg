@@ -1,0 +1,41 @@
+// Tailwind v4 spacing scale: --spacing = 0.25rem = 4px, step n = n * 4px.
+// Source: tailwindcss.com/docs/padding
+
+/// Tailwind spacing steps in logical pixels. `s1_5` is Tailwind's `1.5`.
+abstract final class TwSpacing {
+  static const double s0 = 0;
+  static const double px = 1;
+  static const double s0_5 = 2;
+  static const double s1 = 4;
+  static const double s1_5 = 6;
+  static const double s2 = 8;
+  static const double s2_5 = 10;
+  static const double s3 = 12;
+  static const double s3_5 = 14;
+  static const double s4 = 16;
+  static const double s5 = 20;
+  static const double s6 = 24;
+  static const double s7 = 28;
+  static const double s8 = 32;
+  static const double s9 = 36;
+  static const double s10 = 40;
+  static const double s11 = 44;
+  static const double s12 = 48;
+  static const double s14 = 56;
+  static const double s16 = 64;
+  static const double s20 = 80;
+  static const double s24 = 96;
+  static const double s28 = 112;
+  static const double s32 = 128;
+  static const double s36 = 144;
+  static const double s40 = 160;
+  static const double s44 = 176;
+  static const double s48 = 192;
+  static const double s52 = 208;
+  static const double s56 = 224;
+  static const double s60 = 240;
+  static const double s64 = 256;
+  static const double s72 = 288;
+  static const double s80 = 320;
+  static const double s96 = 384;
+}
