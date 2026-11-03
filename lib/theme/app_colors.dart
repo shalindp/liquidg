@@ -37,7 +37,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color warning;
 
   static final AppColors light = AppColors(
-    background: TwColors.zinc.s100,
+    background: TwColors.neutral.s50,
     surface: TwColors.white,
     surfaceMuted: TwColors.zinc.s200,
     border: TwColors.zinc.s200,
