@@ -10,3 +10,9 @@ light:
 
 auto-theme:
 	adb shell "cmd uimode night auto"
+
+emulator:
+	emulator -avd flutter_pixel9
+
+dev:
+	@./tool/dev.sh
