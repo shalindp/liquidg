@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../nav/routes.dart';
+
 class MoreScreen extends StatelessWidget {
   const MoreScreen({super.key});
 
@@ -13,7 +15,7 @@ class MoreScreen extends StatelessWidget {
           const Text('More placeholder'),
           const SizedBox(height: 16),
           FilledButton(
-            onPressed: () => context.go('/more/features'),
+            onPressed: () => context.go(AppRoute.features.path),
             child: const Text('Features'),
           ),
         ],

@@ -4,6 +4,8 @@ import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/theme.dart';
+import 'nav_tab.dart';
+import 'routes.dart';
 
 LiquidGlassTabBarItem _tab(String asset, String label) {
   return LiquidGlassTabBarItem(
@@ -18,10 +20,7 @@ LiquidGlassTabBarItem _tab(String asset, String label) {
 }
 
 final _tabs = <LiquidGlassTabBarItem>[
-  _tab('assets/icons/nav/stores.svg', 'Stores'),
-  _tab('assets/icons/nav/products.svg', 'Products'),
-  _tab('assets/icons/nav/lists.svg', 'Lists'),
-  _tab('assets/icons/nav/more.svg', 'More'),
+  for (final tab in NavTab.values) _tab(tab.icon, tab.route.title),
 ];
 
 class ShellScreen extends StatelessWidget {
@@ -34,13 +33,12 @@ class ShellScreen extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     final dark = Theme.brightnessOf(context) == Brightness.dark;
     final index = navigationShell.currentIndex;
-    final onFeatures = GoRouterState.of(context).uri.path.endsWith('/features');
+    final route =
+        AppRoute.matching(GoRouterState.of(context).uri.path) ??
+        NavTab.values[index].route;
     return LiquidGlassScaffold(
       backgroundColor: context.colors.background,
-      appBar: LiquidGlassAppBar(
-        title: Text(onFeatures ? 'Features' : _tabs[index].label!),
-        width: width - 32,
-      ),
+      appBar: LiquidGlassAppBar(title: Text(route.title), width: width - 32),
       appBarTopMargin: 8,
       body: navigationShell,
       bottomNavigationBar: LiquidGlassTabBar(

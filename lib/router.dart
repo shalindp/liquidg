@@ -1,14 +1,15 @@
 import 'package:go_router/go_router.dart';
 
+import 'nav/routes.dart';
+import 'nav/shell_screen.dart';
 import 'screens/features_screen.dart';
 import 'screens/lists_screen.dart';
 import 'screens/more_screen.dart';
 import 'screens/products_screen.dart';
-import 'screens/shell_screen.dart';
 import 'screens/stores_screen.dart';
 
 final router = GoRouter(
-  initialLocation: '/stores',
+  initialLocation: AppRoute.stores.path,
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -17,7 +18,7 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/stores',
+              path: AppRoute.stores.path,
               builder: (context, state) => const StoresScreen(),
             ),
           ],
@@ -25,7 +26,7 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/products',
+              path: AppRoute.products.path,
               builder: (context, state) => const ProductsScreen(),
             ),
           ],
@@ -33,7 +34,7 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/lists',
+              path: AppRoute.lists.path,
               builder: (context, state) => const ListsScreen(),
             ),
           ],
@@ -41,11 +42,11 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/more',
+              path: AppRoute.more.path,
               builder: (context, state) => const MoreScreen(),
               routes: [
                 GoRoute(
-                  path: 'features',
+                  path: AppRoute.features.segment,
                   builder: (context, state) => const FeaturesScreen(),
                 ),
               ],
