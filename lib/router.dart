@@ -9,7 +9,7 @@ import 'screens/products_screen.dart';
 import 'screens/stores_screen.dart';
 
 final router = GoRouter(
-  initialLocation: AppRoute.stores.path,
+  initialLocation: AppRoute.products.path,
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>

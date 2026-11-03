@@ -27,6 +27,10 @@ SOURCES = {
     "clip": "M11 7.5C11 8.32843 11.6716 9 12.5 9C13.3284 9 14 8.32843 14 7.5V4C14 2.89543 13.1046 2 12 2C10.8954 2 10 2.89543 10 4V5",
     "line_short": "M7.5 17.5H12.5",
     "line_long": "M7.5 13.5H16.5",
+    "basket": "M8 7H16C17.8856 7 18.8284 7 19.4142 7.58579C20 8.17157 20 9.11438 20 11V15C20 18.2998 20 19.9497 18.9749 20.9749C17.9497 22 16.2998 22 13 22H11C7.70017 22 6.05025 22 5.02513 20.9749C4 19.9497 4 18.2998 4 15V11C4 9.11438 4 8.17157 4.58579 7.58579C5.17157 7 6.11438 7 8 7Z",
+    "basket_handle": "M16 9.5C16 5.63401 14.2091 2 12 2C9.79086 2 8 5.63401 8 9.5",
+    "clear_x1": "M14.9994 15L9 9",
+    "clear_x2": "M9.00064 15L15 9",
     "circle": "M22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12Z",
 }
 
@@ -44,6 +48,16 @@ RECIPES = {
         "body": "sticky",
         "cut": [("clip", 2.9), ("line_short", 1.5), ("line_long", 1.5)],
         "add": [("clip", 1.5)],
+    },
+    "basket": {
+        "dir": "assets/icons",
+        "body": "basket",
+        "add": [("basket_handle", 1.5)],
+    },
+    "clear": {
+        "dir": "assets/icons",
+        "body": "circle",
+        "cut": [("clear_x1", 1.5), ("clear_x2", 1.5)],
     },
     "more": {
         "body": "circle",
@@ -197,8 +211,9 @@ def build(recipe):
 
 
 def write(name, geom):
-    OUT.mkdir(parents=True, exist_ok=True)
-    path = OUT / f"{name}.svg"
+    out = ROOT / RECIPES[name].get("dir", "assets/icons/nav")
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / f"{name}.svg"
     path.write_text(
         '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" '
         f'viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" '

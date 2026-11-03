@@ -4,6 +4,7 @@ import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/theme.dart';
+import '../widgets/search_header.dart';
 import 'nav_tab.dart';
 import 'routes.dart';
 
@@ -34,15 +35,18 @@ class ShellScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final dark = Theme.brightnessOf(context) == Brightness.dark;
     final index = navigationShell.currentIndex;
     final route =
         AppRoute.matching(GoRouterState.of(context).uri.path) ??
         NavTab.values[index].route;
     return LiquidGlassScaffold(
       backgroundColor: context.colors.background,
-      appBar: LiquidGlassAppBar(title: Text(route.title), width: width - 32),
-      appBarTopMargin: 8,
+      appBar: route == AppRoute.products
+          ? const SearchHeader()
+          : LiquidGlassAppBar(title: Text(route.title), width: width - 32),
+      appBarTopMargin: route == AppRoute.products
+          ? -MediaQuery.viewPaddingOf(context).top
+          : 8,
       body: navigationShell,
       bottomNavigationBar: LiquidGlassTabBar(
         items: _tabs,
@@ -52,7 +56,7 @@ class ShellScreen extends StatelessWidget {
         width: (width - 32).clamp(240, 420),
         height: 68,
         margin: const EdgeInsets.only(bottom: TwSpacing.s2),
-        style: dark
+        style: Theme.brightnessOf(context) == Brightness.dark
             ? LiquidGlassTabBar.defaultDarkStyle
             : LiquidGlassTabBar.defaultStyle,
         itemStyle: LiquidGlassTabItemStyle(
