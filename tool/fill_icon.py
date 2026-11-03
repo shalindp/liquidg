@@ -10,6 +10,13 @@ from shapely.ops import unary_union
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "assets/icons/nav"
 
+USAGE = """usage: fill_icon.py [icon ...]
+       fill_icon.py --list
+
+Regenerates assets/icons/nav/<icon>.svg from the Hugeicons free (MIT) stroke
+paths in SOURCES. With no icon names, rebuilds every recipe. Needs shapely:
+python3 -m venv .venv && .venv/bin/pip install shapely"""
+
 SOURCES = {
     "bag": "M3.32352 13.0113C3.6739 10.009 4.18586 7.75784 4.66063 6.15851C5.04994 4.84711 5.24459 4.19141 6.04283 3.5957C6.84107 3 7.65697 3 9.28876 3H14.7113C16.3431 3 17.159 3 17.9572 3.5957C18.7554 4.19141 18.9501 4.84711 19.3394 6.15851C19.8142 7.75784 20.3261 10.009 20.6765 13.0113C21.0895 16.5497 21.2959 18.3189 20.1027 19.6594C18.9095 21 16.9758 21 13.1084 21H10.8916C7.02422 21 5.09052 21 3.89731 19.6594C2.70411 18.3189 2.91058 16.5497 3.32352 13.0113Z",
     "bag_handle": "M9 7C9 8.65685 10.3431 10 12 10C13.6569 10 15 8.65685 15 7",
@@ -166,6 +173,7 @@ def rings(geom, tol=0.008):
     for poly in polys:
         out.append(list(poly.exterior.coords))
         out.extend(list(ring.coords) for ring in poly.interiors)
+    out.sort(key=lambda r: (round(r[0][0], 2), round(r[0][1], 2), len(r)))
     return out
 
 
@@ -199,6 +207,9 @@ def write(name, geom):
 
 
 def main(argv):
+    if "--help" in argv or "-h" in argv:
+        print(USAGE)
+        return 0
     if "--list" in argv:
         print("\n".join(RECIPES))
         return 0

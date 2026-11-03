@@ -9,7 +9,23 @@
 7. Style widgets with Mix (`BoxStyler`, `TextStyler`, tokens from `lib/theme/mix_tokens.dart`) where it fits.
 8. Navigation uses `go_router`, configured in `lib/router.dart`. Tabs are a `StatefulShellRoute.indexedStack` so each tab keeps its state. Tabs: stores, products, lists, more. `more` has the sub route `features`.
 9. The glass UI (scaffold, app bar, tab bar) uses `liquid_glass_easy`. `LiquidGlassEngine.liteGlassOnSkia` is on so non-Impeller devices get the cheap glass.
-10. Icons come from `phosphoricons_flutter` (`PhosphorIconsRegular.*`, `PhosphorIconsFill.*`). Do not use `phosphor_flutter` (fails to build: it extends the final `IconData`) or `hugeicons` (stroke-only, removed).
-11. Active tab icons use the Fill style, inactive use Regular.
+10. Tab icons are filled SVGs in `assets/icons/nav/`, drawn with `SvgPicture.asset` + `ColorFilter.mode(glyph.color, BlendMode.srcIn)`. Do not add `phosphoricons_flutter` or `hugeicons` as dependencies.
+11. Active/idle tab icons differ only by colour (`BrandColors.accent500` / `TwColors.neutral.s900`); every tab uses its filled variant.
 12. Run `flutter analyze` after changes and fix everything it reports.
 13. `make dark`, `make light` and `make auto-theme` switch the Android emulator colour mode through adb.
+
+## Filled icon generator
+
+`tool/fill_icon.py` turns a Hugeicons free (MIT) stroke path into the filled variant shipped in `assets/icons/nav/`.
+
+| Task | Command |
+| --- | --- |
+| one-time deps | `python3 -m venv .venv && .venv/bin/pip install shapely` |
+| rebuild all | `.venv/bin/python tool/fill_icon.py` |
+| rebuild one | `.venv/bin/python tool/fill_icon.py stores` |
+| list names | `.venv/bin/python tool/fill_icon.py --list` |
+
+- Source paths live in `SOURCES`; output recipes in `RECIPES`: `body` (filled path), `add` (path, width — stroke band unioned on top), `cut` (path, width — stroke band subtracted), `cut_dots` (x, y, r).
+- Output is one `<path fill-rule="evenodd">` at 24x24, tinted at runtime, so an icon is a single asset with no colour baked in.
+- Derive only from the free MIT stroke set. Pro art (solid/bulk/duotone) may not be used as a source.
+- Keep `assets/icons/nav/NOTICE` listing every source icon the fills were derived from.
