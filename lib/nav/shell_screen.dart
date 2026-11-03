@@ -14,7 +14,10 @@ LiquidGlassTabBarItem _tab(String asset, String label) {
       asset,
       width: glyph.size,
       height: glyph.size,
-      colorFilter: ColorFilter.mode(glyph.color, BlendMode.srcIn),
+      colorFilter: ColorFilter.mode(
+        glyph.selected ? glyph.color : context.colors.iconInactive,
+        BlendMode.srcIn,
+      ),
     ),
   );
 }
@@ -54,7 +57,7 @@ class ShellScreen extends StatelessWidget {
             : LiquidGlassTabBar.defaultStyle,
         itemStyle: LiquidGlassTabItemStyle(
           selectedColor: BrandColors.accent500,
-          unselectedColor: TwColors.neutral.s900,
+          unselectedColor: context.colors.labelInactive,
         ),
       ),
     );

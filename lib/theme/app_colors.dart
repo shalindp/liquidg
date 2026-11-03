@@ -12,6 +12,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.textPrimary,
     required this.textSecondary,
     required this.textOnAccent,
+    required this.iconInactive,
+    required this.labelInactive,
     required this.accent,
     required this.accentPressed,
     required this.danger,
@@ -26,6 +28,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color textPrimary;
   final Color textSecondary;
   final Color textOnAccent;
+  final Color iconInactive;
+  final Color labelInactive;
   final Color accent;
   final Color accentPressed;
   final Color danger;
@@ -40,6 +44,8 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: TwColors.zinc.s900,
     textSecondary: TwColors.zinc.s500,
     textOnAccent: TwColors.white,
+    iconInactive: TwColors.neutral.s900,
+    labelInactive: TwColors.neutral.s900,
     accent: TwColors.blue.s500,
     accentPressed: TwColors.blue.s600,
     danger: TwColors.red.s500,
@@ -55,6 +61,8 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: TwColors.zinc.s50,
     textSecondary: TwColors.zinc.s400,
     textOnAccent: TwColors.white,
+    iconInactive: TwColors.neutral.s600,
+    labelInactive: TwColors.white,
     accent: TwColors.blue.s400,
     accentPressed: TwColors.blue.s500,
     danger: TwColors.red.s400,
@@ -71,6 +79,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? textPrimary,
     Color? textSecondary,
     Color? textOnAccent,
+    Color? iconInactive,
+    Color? labelInactive,
     Color? accent,
     Color? accentPressed,
     Color? danger,
@@ -84,6 +94,8 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: textPrimary ?? this.textPrimary,
     textSecondary: textSecondary ?? this.textSecondary,
     textOnAccent: textOnAccent ?? this.textOnAccent,
+    iconInactive: iconInactive ?? this.iconInactive,
+    labelInactive: labelInactive ?? this.labelInactive,
     accent: accent ?? this.accent,
     accentPressed: accentPressed ?? this.accentPressed,
     danger: danger ?? this.danger,
@@ -103,6 +115,8 @@ class AppColors extends ThemeExtension<AppColors> {
       textPrimary: l(textPrimary, other.textPrimary),
       textSecondary: l(textSecondary, other.textSecondary),
       textOnAccent: l(textOnAccent, other.textOnAccent),
+      iconInactive: l(iconInactive, other.iconInactive),
+      labelInactive: l(labelInactive, other.labelInactive),
       accent: l(accent, other.accent),
       accentPressed: l(accentPressed, other.accentPressed),
       danger: l(danger, other.danger),

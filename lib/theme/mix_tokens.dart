@@ -12,6 +12,8 @@ const $border = ColorToken('color.border');
 const $textPrimary = ColorToken('color.textPrimary');
 const $textSecondary = ColorToken('color.textSecondary');
 const $textOnAccent = ColorToken('color.textOnAccent');
+const $iconInactive = ColorToken('color.iconInactive');
+const $labelInactive = ColorToken('color.labelInactive');
 const $accent = ColorToken('color.accent');
 const $accentPressed = ColorToken('color.accentPressed');
 const $danger = ColorToken('color.danger');
@@ -58,6 +60,8 @@ class AppMixScope extends StatelessWidget {
         $textPrimary: c.textPrimary,
         $textSecondary: c.textSecondary,
         $textOnAccent: c.textOnAccent,
+        $iconInactive: c.iconInactive,
+        $labelInactive: c.labelInactive,
         $accent: c.accent,
         $accentPressed: c.accentPressed,
         $danger: c.danger,
