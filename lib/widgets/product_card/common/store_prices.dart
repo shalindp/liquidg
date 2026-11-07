@@ -141,15 +141,26 @@ class _StoreRow extends StatelessWidget {
               height: TwSpacing.s4,
             ),
             const SizedBox(width: TwSpacing.s3),
-            Text(
-              store.name,
+            Text.rich(
+              TextSpan(
+                text: '${store.chain} ',
+                style: TextStyle(
+                  fontSize: TwFontSize.xs,
+                  fontWeight: TwFontWeight.normal,
+                ),
+                children: [
+                  TextSpan(
+                    text: store.branch,
+                    style: TextStyle(
+                      fontSize: TwFontSize.sm,
+                      fontWeight: TwFontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: colors.textPrimary,
-                fontSize: TwFontSize.sm,
-                fontWeight: TwFontWeight.normal,
-              ),
+              style: TextStyle(color: colors.textPrimary),
             ).expanded(),
             Text(
               store.deltaFrom(lowest),

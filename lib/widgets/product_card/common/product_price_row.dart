@@ -22,7 +22,6 @@ class _PriceRow extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _Price(price: price),
-            _LowestStore(name: store),
             Text(
               unitPrice,
               style: TextStyle(
@@ -30,6 +29,7 @@ class _PriceRow extends StatelessWidget {
                 fontSize: TwFontSize.xs,
               ),
             ),
+            _LowestStore(name: store),
           ],
         ).padding(right: TwSpacing.s2).expanded(),
         const _AddButton(),

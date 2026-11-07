@@ -11,8 +11,6 @@ class StorePrice {
   final String branch;
   final double price;
 
-  String get name => '$chain $branch';
-
   String get label => '\$${price.toStringAsFixed(2)}';
 
   String deltaFrom(double lowest) =>
