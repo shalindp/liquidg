@@ -9,17 +9,20 @@ class AppGlassButton extends StatelessWidget {
     required this.child,
     this.onPressed,
     this.size = TwSpacing.s11,
+    this.visible = true,
   });
 
   final Widget child;
   final VoidCallback? onPressed;
   final double size;
+  final bool visible;
 
   @override
   Widget build(BuildContext context) {
     return LiquidGlassButton(
       width: size,
       height: size,
+      visibility: visible,
       padding: EdgeInsets.zero,
       style: AppGlass.style(Theme.brightnessOf(context)),
       touch: const LiquidGlassTouch(

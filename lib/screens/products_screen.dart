@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/theme.dart';
 import '../widgets/product_card.dart';
-import '../widgets/search_header.dart';
+import '../widgets/collapsing_header.dart';
 
 class ProductsScreen extends StatelessWidget {
   const ProductsScreen({super.key});
@@ -34,14 +34,14 @@ class ProductsScreen extends StatelessWidget {
     return ListView.separated(
       padding: EdgeInsets.fromLTRB(
         TwSpacing.s4,
-        SearchHeader.heightOf(context) + TwSpacing.s3,
+        CollapsingHeader.heightOf(context) + TwSpacing.s3,
         TwSpacing.s4,
         TwSpacing.s28 + TwSpacing.s2,
       ),
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
       ),
-      itemCount: 40,
+      itemCount: 300,
       separatorBuilder: (_, _) => const SizedBox(height: TwSpacing.s3),
       itemBuilder: (context, i) => ProductCard(
         name: _names[i % _names.length],
