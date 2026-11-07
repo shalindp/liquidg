@@ -6,3 +6,4 @@ export 'mix_tokens.dart';
 export 'tailwind_colors.dart';
 export 'tailwind_radius.dart';
 export 'tailwind_spacing.dart';
+export 'tailwind_typography.dart';
