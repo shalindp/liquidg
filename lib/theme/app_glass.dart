@@ -40,4 +40,16 @@ abstract final class AppGlass {
       shadow: const LiquidGlassShadow(blur: 6, opacity: 0.05),
     );
   }
+
+  static LiquidGlassStyle foldedStyle(Brightness brightness) {
+    final base = brightness == Brightness.dark
+        ? LiquidGlassTabBar.defaultDarkStyle
+        : LiquidGlassTabBar.defaultStyle;
+    return base.copyWith(
+      specular: const LiquidGlassLight.specular(
+        intensity: 0,
+        oppositeIntensity: 0,
+      ),
+    );
+  }
 }

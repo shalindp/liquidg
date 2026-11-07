@@ -1,10 +1,34 @@
 import 'package:signals_flutter/signals_flutter.dart';
 
 class StorePrice {
-  const StorePrice({required this.name, required this.price});
+  const StorePrice({
+    required this.chain,
+    required this.branch,
+    required this.price,
+  });
 
-  final String name;
-  final String price;
+  final String chain;
+  final String branch;
+  final double price;
+
+  String get name => '$chain $branch';
+
+  String get label => '\$${price.toStringAsFixed(2)}';
+
+  String deltaFrom(double lowest) =>
+      '+\$${(price - lowest).toStringAsFixed(2)}';
+}
+
+class ProductPrice {
+  const ProductPrice({required this.dollars, required this.cents});
+
+  factory ProductPrice.of(double value) {
+    final parts = value.toStringAsFixed(2).split('.');
+    return ProductPrice(dollars: parts[0], cents: parts[1]);
+  }
+
+  final String dollars;
+  final String cents;
 }
 
 class ProductCardController {
@@ -14,17 +38,21 @@ class ProductCardController {
   final name = 'Anchor Lite Milk 2L';
   final imageUrl =
       'https://assets.woolworths.com.au/images/2010/282819.jpg?impolicy=wowb2bgpkhx';
-  final lowestPrice = '\$4.52';
-  final unitPrice = '(\$2.26/L)';
+  final lowestStore = const StorePrice(
+    chain: 'Woolworths',
+    branch: 'Northlands',
+    price: 16.79,
+  );
+  late final lowestPrice = ProductPrice.of(lowestStore.price);
+  final unitPrice = '(\$8.40/L)';
   final stores = const <StorePrice>[
-    StorePrice(name: 'Woolworths Northlands', price: '\$5.23'),
-    StorePrice(name: 'Woolworths Alexandra', price: '\$5.23'),
-    StorePrice(name: 'Woolworths Preston', price: '\$5.29'),
-    StorePrice(name: 'Woolworths Reservoir', price: '\$5.35'),
-    StorePrice(name: 'Woolworths Thornbury', price: '\$5.40'),
-    StorePrice(name: 'Woolworths Coburg', price: '\$5.45'),
-    StorePrice(name: 'Woolworths Brunswick', price: '\$5.50'),
-    StorePrice(name: 'Woolworths Fitzroy', price: '\$5.60'),
+    StorePrice(chain: 'Woolworths', branch: 'Alexandra', price: 17.20),
+    StorePrice(chain: 'Woolworths', branch: 'Preston', price: 17.45),
+    StorePrice(chain: 'Woolworths', branch: 'Reservoir', price: 17.90),
+    StorePrice(chain: 'Woolworths', branch: 'Thornbury', price: 18.10),
+    StorePrice(chain: 'Woolworths', branch: 'Coburg', price: 18.35),
+    StorePrice(chain: 'Woolworths', branch: 'Brunswick', price: 18.80),
+    StorePrice(chain: 'Woolworths', branch: 'Fitzroy', price: 19.40),
   ];
 
   final favourite = signal(false);

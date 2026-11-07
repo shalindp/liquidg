@@ -10,12 +10,14 @@ class AppGlassButton extends StatelessWidget {
     this.onPressed,
     this.size = TwSpacing.s11,
     this.visible = true,
+    this.folded = false,
   });
 
   final Widget child;
   final VoidCallback? onPressed;
   final double size;
   final bool visible;
+  final bool folded;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,9 @@ class AppGlassButton extends StatelessWidget {
       height: size,
       visibility: visible,
       padding: EdgeInsets.zero,
-      style: AppGlass.style(Theme.brightnessOf(context)),
+      style: folded
+          ? AppGlass.foldedStyle(Theme.brightnessOf(context))
+          : AppGlass.style(Theme.brightnessOf(context)),
       touch: const LiquidGlassTouch(
         flex: LiquidGlassFlex(
           stretch: 4,

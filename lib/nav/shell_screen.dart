@@ -46,10 +46,6 @@ class ShellScreen extends StatefulWidget {
   State<ShellScreen> createState() => _ShellScreenState();
 }
 
-LiquidGlassStyle _foldedStyle(LiquidGlassStyle base) => base.copyWith(
-  specular: const LiquidGlassLight.specular(intensity: 0, oppositeIntensity: 0),
-);
-
 const double _navHeight = 68;
 const double _circle = CollapsingHeader.controlSize;
 
@@ -81,7 +77,8 @@ class _ShellScreenState extends State<ShellScreen> {
       TwSpacing.s2,
       MediaQuery.viewPaddingOf(context).bottom + TwSpacing.s2 - TwSpacing.s4,
     );
-    final barStyle = Theme.brightnessOf(context) == Brightness.dark
+    final brightness = Theme.brightnessOf(context);
+    final barStyle = brightness == Brightness.dark
         ? LiquidGlassTabBar.defaultDarkStyle
         : LiquidGlassTabBar.defaultStyle;
     final fullWidth = (width - TwSpacing.s8).clamp(240.0, 420.0);
@@ -150,7 +147,7 @@ class _ShellScreenState extends State<ShellScreen> {
                   16,
                   navBottom,
                 ),
-                style: folded ? _foldedStyle(barStyle) : barStyle,
+                style: folded ? AppGlass.foldedStyle(brightness) : barStyle,
                 pillStyle: LiquidGlassTabPillStyle(show: !folded),
                 itemStyle: LiquidGlassTabItemStyle(
                   selectedColor: BrandColors.accent500,

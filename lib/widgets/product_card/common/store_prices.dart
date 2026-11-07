@@ -24,6 +24,7 @@ class _StorePrices extends StatelessWidget {
               child: Column(
                 children: [
                   _StoreList(
+                    lowest: c.lowestStore.price,
                     stores: c.stores,
                     height: height,
                     scrollable: expanded,
@@ -49,11 +50,13 @@ class _StorePrices extends StatelessWidget {
 
 class _StoreList extends StatefulWidget {
   const _StoreList({
+    required this.lowest,
     required this.stores,
     required this.height,
     required this.scrollable,
   });
 
+  final double lowest;
   final List<StorePrice> stores;
   final double height;
   final bool scrollable;
@@ -106,17 +109,25 @@ class _StoreListState extends State<_StoreList> {
             : const NeverScrollableScrollPhysics(),
         itemExtent: _rowHeight,
         itemCount: widget.stores.length,
-        itemBuilder: (context, i) =>
-            _StoreRow(store: widget.stores[i], divider: i > 0),
+        itemBuilder: (context, i) => _StoreRow(
+          store: widget.stores[i],
+          lowest: widget.lowest,
+          divider: i > 0,
+        ),
       ),
     ).constrained(height: widget.height);
   }
 }
 
 class _StoreRow extends StatelessWidget {
-  const _StoreRow({required this.store, required this.divider});
+  const _StoreRow({
+    required this.store,
+    required this.lowest,
+    required this.divider,
+  });
 
   final StorePrice store;
+  final double lowest;
   final bool divider;
 
   @override
@@ -136,16 +147,25 @@ class _StoreRow extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: TwFontSize.xs,
-                fontWeight: TwFontWeight.medium,
+                fontSize: TwFontSize.sm,
+                fontWeight: TwFontWeight.normal,
               ),
             ).expanded(),
             Text(
-              store.price,
+              store.deltaFrom(lowest),
+              style: TextStyle(
+                color: colors.textSecondary,
+                fontSize: TwFontSize.xs,
+                fontWeight: TwFontWeight.normal,
+              ),
+            ),
+            const SizedBox(width: TwSpacing.s2),
+            Text(
+              store.label,
               style: TextStyle(
                 color: colors.textPrimary,
-                fontSize: TwFontSize.xs,
-                fontWeight: TwFontWeight.medium,
+                fontSize: TwFontSize.sm,
+                fontWeight: TwFontWeight.normal,
               ),
             ),
           ],
@@ -190,7 +210,7 @@ class _SeeMoreButton extends StatelessWidget {
                   ? HugeIcons.strokeRoundedChevronUp
                   : HugeIcons.strokeRoundedChevronDown,
               color: colors.textSecondary,
-              size: TwSpacing.s3,
+              size: TwSpacing.s4,
             ),
           ],
         )

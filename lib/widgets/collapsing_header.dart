@@ -77,6 +77,7 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
       children: [
         AppGlassButton(
           size: _button,
+          folded: collapsed,
           onPressed: widget.onBarcodeScanPressed,
           child: HugeIcon(
             icon: HugeIcons.strokeRoundedBarcodeScan,
@@ -109,8 +110,7 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
           ignoring: !collapsed,
           child: LiquidGlassMorph(
             opacity: collapsed ? 1 : 0,
-            style: AppGlass.style(Theme.brightnessOf(context))
-                .copyWith(blur: 12),
+            style: AppGlass.foldedStyle(Theme.brightnessOf(context)),
             child: _Island(
               onSearch: _openSearch,
               onBasket: widget.onBasketPressed,

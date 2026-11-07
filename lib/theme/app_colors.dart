@@ -12,6 +12,7 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.textPrimary,
     required this.textSecondary,
     required this.textOnAccent,
+    required this.price,
     required this.iconInactive,
     required this.labelInactive,
     required this.accent,
@@ -28,6 +29,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color textPrimary;
   final Color textSecondary;
   final Color textOnAccent;
+  final Color price;
   final Color iconInactive;
   final Color labelInactive;
   final Color accent;
@@ -44,6 +46,7 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: TwColors.zinc.s900,
     textSecondary: TwColors.zinc.s500,
     textOnAccent: TwColors.white,
+    price: TwColors.neutral.s700,
     iconInactive: TwColors.neutral.s900,
     labelInactive: TwColors.neutral.s900,
     accent: TwColors.blue.s500,
@@ -61,6 +64,7 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: TwColors.zinc.s50,
     textSecondary: TwColors.zinc.s400,
     textOnAccent: TwColors.white,
+    price: TwColors.neutral.s300,
     iconInactive: TwColors.neutral.s600,
     labelInactive: TwColors.white,
     accent: TwColors.blue.s400,
@@ -79,6 +83,7 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? textPrimary,
     Color? textSecondary,
     Color? textOnAccent,
+    Color? price,
     Color? iconInactive,
     Color? labelInactive,
     Color? accent,
@@ -94,6 +99,7 @@ class AppColors extends ThemeExtension<AppColors> {
     textPrimary: textPrimary ?? this.textPrimary,
     textSecondary: textSecondary ?? this.textSecondary,
     textOnAccent: textOnAccent ?? this.textOnAccent,
+    price: price ?? this.price,
     iconInactive: iconInactive ?? this.iconInactive,
     labelInactive: labelInactive ?? this.labelInactive,
     accent: accent ?? this.accent,
@@ -115,6 +121,7 @@ class AppColors extends ThemeExtension<AppColors> {
       textPrimary: l(textPrimary, other.textPrimary),
       textSecondary: l(textSecondary, other.textSecondary),
       textOnAccent: l(textOnAccent, other.textOnAccent),
+      price: l(price, other.price),
       iconInactive: l(iconInactive, other.iconInactive),
       labelInactive: l(labelInactive, other.labelInactive),
       accent: l(accent, other.accent),

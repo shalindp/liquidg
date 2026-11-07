@@ -1,36 +1,39 @@
 part of '../product_card.dart';
 
 class _TitleRow extends StatelessWidget {
-  const _TitleRow({
-    required this.name,
-    required this.favourite,
-    required this.onFavourite,
-  });
+  const _TitleRow({required this.name});
 
   final String name;
-  final Signal<bool> favourite;
-  final VoidCallback onFavourite;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: colors.textPrimary,
-            fontSize: TwFontSize.sm,
-            fontWeight: TwFontWeight.medium,
-          ),
-        ).expanded(),
-        _FavouriteIcon(favourite: favourite)
-            .gestures(onTap: onFavourite, behavior: HitTestBehavior.opaque),
-      ],
-    );
+    return Text(
+      name,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: context.colors.textPrimary,
+        fontSize: TwFontSize.base,
+        fontWeight: TwFontWeight.semibold,
+      ),
+    ).padding(right: TwSpacing.s6);
+  }
+}
+
+class _FavouriteButton extends StatelessWidget {
+  const _FavouriteButton({required this.favourite, required this.onPressed});
+
+  static const double size = _FavouriteIconState._icon;
+
+  final Signal<bool> favourite;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return _FavouriteIcon(favourite: favourite)
+        .center()
+        .constrained(width: size, height: size)
+        .gestures(onTap: onPressed, behavior: HitTestBehavior.opaque);
   }
 }
 
@@ -50,7 +53,8 @@ class _FavouriteIconState extends State<_FavouriteIcon>
     stiffness: 300,
     damping: 15,
   );
-  static const double _box = TwSpacing.s10;
+  static const double _box = TwSpacing.s12;
+  static const double _icon = 26;
 
   late final _pop = AnimationController.unbounded(vsync: this, value: 1);
   late final _burst = AnimationController(
@@ -88,8 +92,8 @@ class _FavouriteIconState extends State<_FavouriteIcon>
   Widget build(BuildContext context) {
     final colors = context.colors;
     return SizedBox(
-      width: TwSpacing.s5,
-      height: TwSpacing.s5,
+      width: _icon,
+      height: _icon,
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
@@ -110,21 +114,17 @@ class _FavouriteIconState extends State<_FavouriteIcon>
                 animation: _pop,
                 builder: (context, child) =>
                     Transform.scale(scale: _pop.value, child: child),
-                child: on
-                    ? SvgPicture.asset(
-                        'assets/icons/favourite.svg',
-                        width: TwSpacing.s5,
-                        height: TwSpacing.s5,
-                        colorFilter: ColorFilter.mode(
-                          colors.danger,
-                          BlendMode.srcIn,
-                        ),
-                      )
-                    : HugeIcon(
-                        icon: HugeIcons.strokeRoundedFavourite,
-                        color: colors.textSecondary.withValues(alpha: 0.5),
-                        size: TwSpacing.s5,
-                      ),
+                child: SvgPicture.asset(
+                  'assets/icons/favourite.svg',
+                  width: _icon,
+                  height: _icon,
+                  colorFilter: ColorFilter.mode(
+                    on
+                        ? colors.danger
+                        : colors.textSecondary.withValues(alpha: 0.18),
+                    BlendMode.srcIn,
+                  ),
+                ),
               );
             },
           ),
