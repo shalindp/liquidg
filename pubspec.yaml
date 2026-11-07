@@ -39,6 +39,8 @@ dependencies:
   go_router: ^18.1.2
   flutter_svg: ^2.3.2
   hugeicons: ^4.4.0
+  styled_widget: ^0.4.1
+  signals_flutter: ^7.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -7,12 +7,13 @@ void main() {
 
   Future<void> pump(WidgetTester tester) {
     controller = ChromeCollapseController();
+    addTearDown(controller.dispose);
     return tester.pumpWidget(
       MaterialApp(
         home: NotificationListener<ScrollNotification>(
           onNotification: controller.onScroll,
           child: ListView.builder(
-            itemCount: 200,
+            itemCount: 300,
             itemBuilder: (_, i) => SizedBox(height: 60, child: Text('$i')),
           ),
         ),
@@ -20,40 +21,68 @@ void main() {
     );
   }
 
-  testWidgets('small drag does not collapse', (tester) async {
+  testWidgets('slow scrolling never collapses, however far', (tester) async {
     await pump(tester);
-    await tester.drag(find.byType(ListView), const Offset(0, -30));
+    await tester.timedDrag(
+      find.byType(ListView),
+      const Offset(0, -400),
+      const Duration(seconds: 4),
+    );
     await tester.pumpAndSettle();
-    expect(controller.collapsed, isFalse);
+    expect(controller.collapsed.value, isFalse);
   });
 
-  testWidgets('sustained drag down collapses, drag up expands', (tester) async {
+  testWidgets('a short fast drag does not collapse', (tester) async {
     await pump(tester);
-    await tester.drag(find.byType(ListView), const Offset(0, -120));
+    await tester.timedDrag(
+      find.byType(ListView),
+      const Offset(0, -40),
+      const Duration(milliseconds: 40),
+    );
     await tester.pumpAndSettle();
-    expect(controller.collapsed, isTrue);
-    await tester.drag(find.byType(ListView), const Offset(0, 50));
-    await tester.pumpAndSettle();
-    expect(controller.collapsed, isFalse);
+    expect(controller.collapsed.value, isFalse);
   });
 
-  testWidgets('fling collapses and fling back expands', (tester) async {
+  testWidgets('a fast sustained drag collapses, a fast drag back expands', (
+    tester,
+  ) async {
     await pump(tester);
-    await tester.fling(find.byType(ListView), const Offset(0, -80), 1500);
+    await tester.timedDrag(
+      find.byType(ListView),
+      const Offset(0, -300),
+      const Duration(milliseconds: 150),
+    );
     await tester.pumpAndSettle();
-    expect(controller.collapsed, isTrue);
-    await tester.fling(find.byType(ListView), const Offset(0, 80), 1500);
+    expect(controller.collapsed.value, isTrue);
+    await tester.timedDrag(
+      find.byType(ListView),
+      const Offset(0, 120),
+      const Duration(milliseconds: 100),
+    );
     await tester.pumpAndSettle();
-    expect(controller.collapsed, isFalse);
+    expect(controller.collapsed.value, isFalse);
+  });
+
+  testWidgets('a hard fling collapses and a hard fling back expands', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.fling(find.byType(ListView), const Offset(0, -80), 2500);
+    await tester.pumpAndSettle();
+    expect(controller.collapsed.value, isTrue);
+    await tester.fling(find.byType(ListView), const Offset(0, 80), 2500);
+    await tester.pumpAndSettle();
+    expect(controller.collapsed.value, isFalse);
   });
 
   testWidgets('returning to the top expands', (tester) async {
     await pump(tester);
+    controller.collapse();
     await tester.drag(find.byType(ListView), const Offset(0, -200));
     await tester.pumpAndSettle();
-    expect(controller.collapsed, isTrue);
-    await tester.fling(find.byType(ListView), const Offset(0, 600), 200);
+    controller.collapse();
+    await tester.fling(find.byType(ListView), const Offset(0, 1200), 3000);
     await tester.pumpAndSettle();
-    expect(controller.collapsed, isFalse);
+    expect(controller.collapsed.value, isFalse);
   });
 }

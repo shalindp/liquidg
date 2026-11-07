@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
-class ChromeCollapseController extends ValueNotifier<bool> {
-  ChromeCollapseController() : super(false);
+class ChromeCollapseController {
+  final collapsed = signal(false);
 
   static const double collapseSpeed = 900;
   static const double expandSpeed = 450;
@@ -14,16 +15,16 @@ class ChromeCollapseController extends ValueNotifier<bool> {
   double _speed = 0;
   Duration? _lastStamp;
 
-  bool get collapsed => value;
+  void dispose() => collapsed.dispose();
 
   void expand() {
     _reset();
-    value = false;
+    collapsed.value = false;
   }
 
   void collapse() {
     _reset();
-    value = true;
+    collapsed.value = true;
   }
 
   void _reset() {

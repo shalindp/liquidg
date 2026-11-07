@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
-import 'package:mix/mix.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../theme/theme.dart';
 import 'app_glass_button.dart';
@@ -12,14 +12,14 @@ class CollapsingHeader extends StatefulWidget {
     super.key,
     required this.collapsed,
     required this.onExpand,
-    this.onMenuPressed,
+    this.onBarcodeScanPressed,
     this.onBasketPressed,
     this.onChanged,
   });
 
   final bool collapsed;
   final VoidCallback onExpand;
-  final VoidCallback? onMenuPressed;
+  final VoidCallback? onBarcodeScanPressed;
   final VoidCallback? onBasketPressed;
   final ValueChanged<String>? onChanged;
 
@@ -72,82 +72,58 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
     final collapsed = widget.collapsed;
     final fieldBox = width - _side - CollapsingHeader.gutter;
     final searchWidth = fieldBox - _button - CollapsingHeader.gap;
-    final fieldStyle = BoxStyler()
-        .height(CollapsingHeader.fieldHeight)
-        .borderRadius(.all($radiusFull()))
-        .color($surfaceMuted())
-        .clipBehavior(Clip.antiAlias);
 
-    return SizedBox(
-      width: width,
-      height: CollapsingHeader.height,
-      child: Stack(
-        children: [
-          Positioned(
-            left: CollapsingHeader.gutter,
-            top: 0,
-            child: AppGlassButton(
-              size: _button,
-              onPressed: widget.onMenuPressed,
-              child: HugeIcon(
-                icon: HugeIcons.strokeRoundedMenu01,
-                color: colors.textPrimary,
-                size: 22,
-              ),
+    return Stack(
+      children: [
+        AppGlassButton(
+          size: _button,
+          onPressed: widget.onBarcodeScanPressed,
+          child: HugeIcon(
+            icon: HugeIcons.strokeRoundedBarcodeScan,
+            color: colors.textPrimary,
+            size: 22,
+          ),
+        ).positioned(left: CollapsingHeader.gutter, top: 0),
+        AppGlassButton(
+          size: _button,
+          visible: !collapsed,
+          onPressed: widget.onBasketPressed,
+          child: _Basket(color: BrandColors.accent500),
+        ).positioned(right: CollapsingHeader.gutter, top: 0),
+        Visibility(
+          visible: !collapsed,
+          maintainState: true,
+          child: _SearchField(
+            width: searchWidth,
+            controller: _controller,
+            focusNode: _focus,
+            onChanged: widget.onChanged,
+          ).center(),
+        ).positioned(
+          left: _side,
+          right: _side,
+          top: 0,
+          height: CollapsingHeader.height,
+        ),
+        IgnorePointer(
+          ignoring: !collapsed,
+          child: LiquidGlassMorph(
+            opacity: collapsed ? 1 : 0,
+            style: AppGlass.style(Theme.brightnessOf(context))
+                .copyWith(blur: 12),
+            child: _Island(
+              onSearch: _openSearch,
+              onBasket: widget.onBasketPressed,
             ),
           ),
-          Positioned(
-            right: CollapsingHeader.gutter,
-            top: 0,
-            child: AppGlassButton(
-              size: _button,
-              visible: !collapsed,
-              onPressed: widget.onBasketPressed,
-              child: _Basket(color: BrandColors.accent500),
-            ),
-          ),
-          Positioned(
-            left: _side,
-            right: _side,
-            top: 0,
-            height: CollapsingHeader.height,
-            child: Visibility(
-              visible: !collapsed,
-              maintainState: true,
-              child: Center(
-                child: Box(
-                  style: fieldStyle,
-                  child: _SearchField(
-                    width: searchWidth,
-                    controller: _controller,
-                    focusNode: _focus,
-                    onChanged: widget.onChanged,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right: CollapsingHeader.gutter,
-            top: 0,
-            width: _button * 2,
-            height: CollapsingHeader.height,
-            child: IgnorePointer(
-              ignoring: !collapsed,
-              child: LiquidGlassMorph(
-                opacity: collapsed ? 1 : 0,
-                style: AppGlass.style(Theme.brightnessOf(context))
-                    .copyWith(blur: 12),
-                child: _Island(
-                  onSearch: _openSearch,
-                  onBasket: widget.onBasketPressed,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+        ).positioned(
+          right: CollapsingHeader.gutter,
+          top: 0,
+          width: _button * 2,
+          height: CollapsingHeader.height,
+        ),
+      ],
+    ).constrained(width: width, height: CollapsingHeader.height);
   }
 }
 
@@ -188,28 +164,20 @@ class _Island extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const size = CollapsingHeader.height;
-    return SizedBox(
-      width: size * 2,
-      height: size,
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onSearch,
-              child: const Center(child: _SearchIcon()),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onBasket,
-              child: Center(child: _Basket(color: BrandColors.accent500)),
-            ),
-          ),
-        ],
-      ),
+    return Row(
+      children: [
+        const _SearchIcon()
+            .center()
+            .gestures(onTap: onSearch, behavior: HitTestBehavior.opaque)
+            .expanded(),
+        _Basket(color: BrandColors.accent500)
+            .center()
+            .gestures(onTap: onBasket, behavior: HitTestBehavior.opaque)
+            .expanded(),
+      ],
+    ).constrained(
+      width: CollapsingHeader.height * 2,
+      height: CollapsingHeader.height,
     );
   }
 }
@@ -230,59 +198,61 @@ class _SearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return SizedBox(
-      width: width,
-      height: CollapsingHeader.fieldHeight,
-      child: SearchBar(
-        controller: controller,
-        focusNode: focusNode,
-        onChanged: onChanged,
-        hintText: 'Search',
-        elevation: const WidgetStatePropertyAll(0),
-        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-        backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
-        shape: const WidgetStatePropertyAll(RoundedRectangleBorder()),
-        constraints: const BoxConstraints(
-          minHeight: CollapsingHeader.fieldHeight,
-        ),
-        textStyle: WidgetStatePropertyAll(
-          TextStyle(color: colors.textPrimary, fontSize: 16),
-        ),
-        hintStyle: WidgetStatePropertyAll(
-          TextStyle(color: colors.textSecondary, fontSize: 16),
-        ),
-        leading: const _SearchIcon(),
-        trailing: [
-          ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) => controller.text.isEmpty
-                ? const SizedBox.shrink()
-                : IconButton(
-                    onPressed: () {
-                      controller.clear();
-                      onChanged?.call('');
-                    },
-                    visualDensity: VisualDensity.compact,
-                    style: IconButton.styleFrom(
-                      overlayColor: Colors.transparent,
-                      splashFactory: NoSplash.splashFactory,
-                    ),
-                    icon: SvgPicture.asset(
-                      'assets/icons/clear.svg',
-                      width: 20,
-                      height: 20,
-                      colorFilter: ColorFilter.mode(
-                        colors.textSecondary,
-                        BlendMode.srcIn,
+    return SearchBar(
+          controller: controller,
+          focusNode: focusNode,
+          onChanged: onChanged,
+          hintText: 'Search',
+          elevation: const WidgetStatePropertyAll(0),
+          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+          backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
+          shape: const WidgetStatePropertyAll(RoundedRectangleBorder()),
+          constraints: const BoxConstraints(
+            minHeight: CollapsingHeader.fieldHeight,
+          ),
+          textStyle: WidgetStatePropertyAll(
+            TextStyle(color: colors.textPrimary, fontSize: 16),
+          ),
+          hintStyle: WidgetStatePropertyAll(
+            TextStyle(color: colors.textSecondary, fontSize: 16),
+          ),
+          leading: const _SearchIcon(),
+          trailing: [
+            ListenableBuilder(
+              listenable: controller,
+              builder: (context, _) => controller.text.isEmpty
+                  ? const SizedBox.shrink()
+                  : IconButton(
+                      onPressed: () {
+                        controller.clear();
+                        onChanged?.call('');
+                      },
+                      visualDensity: VisualDensity.compact,
+                      style: IconButton.styleFrom(
+                        overlayColor: Colors.transparent,
+                        splashFactory: NoSplash.splashFactory,
+                      ),
+                      icon: SvgPicture.asset(
+                        'assets/icons/clear.svg',
+                        width: 20,
+                        height: 20,
+                        colorFilter: ColorFilter.mode(
+                          colors.textSecondary,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
-                  ),
+            ),
+          ],
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(horizontal: TwSpacing.s3),
           ),
-        ],
-        padding: const WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: TwSpacing.s3),
-        ),
-      ),
-    );
+        )
+        .constrained(width: width, height: CollapsingHeader.fieldHeight)
+        .clipRRect(all: TwRadius.full)
+        .decorated(
+          color: colors.surfaceMuted,
+          borderRadius: BorderRadius.circular(TwRadius.full),
+        );
   }
 }

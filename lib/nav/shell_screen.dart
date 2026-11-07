@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:signals_flutter/signals_flutter.dart';
+import 'package:styled_widget/styled_widget.dart';
 
 import '../theme/theme.dart';
 import '../widgets/chrome_collapse_controller.dart';
@@ -84,76 +86,81 @@ class _ShellScreenState extends State<ShellScreen> {
         : LiquidGlassTabBar.defaultStyle;
     final fullWidth = (width - TwSpacing.s8).clamp(240.0, 420.0);
 
-    return ValueListenableBuilder<bool>(
-      valueListenable: _chrome,
-      builder: (context, collapsed, _) => TweenAnimationBuilder<double>(
-        tween: Tween(end: collapsed ? _circle : fullWidth),
-        duration: collapsed ? CollapsingHeader.collapseDuration : Duration.zero,
-        curve: Curves.easeOutCubic,
-        builder: (context, barWidth, _) {
-          final progress = ((fullWidth - barWidth) / (fullWidth - _circle))
-              .clamp(0.0, 1.0);
-          final folded = barWidth < fullWidth * 0.55;
-          return LiquidGlassScaffold(
-            backgroundColor: context.colors.background,
-            safeArea: false,
-            appBar: products
-                ? CollapsingHeader(
-                    collapsed: collapsed,
-                    onExpand: _chrome.expand,
-                  )
-                : LiquidGlassAppBar(
-                    title: Text(route.title),
-                    width: width - 32,
-                  ),
-            appBarTopMargin:
-                MediaQuery.viewPaddingOf(context).top + TwSpacing.s2,
-            lenses: [
-              if (products)
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: CollapsingHeader.heightOf(context) + TwSpacing.s2,
-                  child: IgnorePointer(
-                    child: AnimatedOpacity(
-                      opacity: collapsed ? 0 : 1,
-                      duration: collapsed
-                          ? CollapsingHeader.collapseDuration
-                          : Duration.zero,
-                      child: ColoredBox(color: context.colors.background),
+    return SignalBuilder(
+      builder: (context) {
+        final collapsed = _chrome.collapsed.value;
+        return TweenAnimationBuilder<double>(
+          tween: Tween(end: collapsed ? _circle : fullWidth),
+          duration: collapsed
+              ? CollapsingHeader.collapseDuration
+              : Duration.zero,
+          curve: Curves.easeOutCubic,
+          builder: (context, barWidth, _) {
+            final progress = ((fullWidth - barWidth) / (fullWidth - _circle))
+                .clamp(0.0, 1.0);
+            final folded = barWidth < fullWidth * 0.55;
+            return LiquidGlassScaffold(
+              backgroundColor: context.colors.background,
+              safeArea: false,
+              appBar: products
+                  ? CollapsingHeader(
+                      collapsed: collapsed,
+                      onExpand: _chrome.expand,
+                    )
+                  : LiquidGlassAppBar(
+                      title: Text(route.title),
+                      width: width - 32,
                     ),
+              appBarTopMargin:
+                  MediaQuery.viewPaddingOf(context).top + TwSpacing.s2,
+              lenses: [
+                if (products)
+                  IgnorePointer(
+                    child: const SizedBox.expand()
+                        .backgroundColor(context.colors.background)
+                        .opacity(collapsed ? 0 : 1, animate: true)
+                        .animate(
+                          collapsed
+                              ? CollapsingHeader.collapseDuration
+                              : Duration.zero,
+                          Curves.linear,
+                        ),
+                  ).positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: CollapsingHeader.heightOf(context) + TwSpacing.s2,
                   ),
+              ],
+              body: NotificationListener<ScrollNotification>(
+                onNotification: _chrome.onScroll,
+                child: widget.navigationShell,
+              ),
+              bottomNavigationBar: LiquidGlassTabBar(
+                items: folded ? [_iconOnlyTabs[index]] : _tabs,
+                selectedIndex: folded ? 0 : index,
+                onChanged: _select,
+                onReselected: folded ? (_) => _chrome.expand() : null,
+                width: barWidth,
+                height: _navHeight - (_navHeight - _circle) * progress,
+                alignment: Alignment(-progress, 1),
+                margin: EdgeInsets.fromLTRB(
+                  16 + (TwSpacing.s1 + TwSpacing.s2) * progress,
+                  0,
+                  16,
+                  navBottom,
                 ),
-            ],
-            body: NotificationListener<ScrollNotification>(
-              onNotification: _chrome.onScroll,
-              child: widget.navigationShell,
-            ),
-            bottomNavigationBar: LiquidGlassTabBar(
-              items: folded ? [_iconOnlyTabs[index]] : _tabs,
-              selectedIndex: folded ? 0 : index,
-              onChanged: _select,
-              onReselected: folded ? (_) => _chrome.expand() : null,
-              width: barWidth,
-              height: _navHeight - (_navHeight - _circle) * progress,
-              alignment: Alignment(-progress, 1),
-              margin: EdgeInsets.fromLTRB(
-                16 + (TwSpacing.s1 + TwSpacing.s2) * progress,
-                0,
-                16,
-                navBottom,
+                style: folded ? _foldedStyle(barStyle) : barStyle,
+                pillStyle: LiquidGlassTabPillStyle(show: !folded),
+                itemStyle: LiquidGlassTabItemStyle(
+                  selectedColor: BrandColors.accent500,
+                  unselectedColor: context.colors.labelInactive,
+                ),
               ),
-              style: folded ? _foldedStyle(barStyle) : barStyle,
-              pillStyle: LiquidGlassTabPillStyle(show: !folded),
-              itemStyle: LiquidGlassTabItemStyle(
-                selectedColor: BrandColors.accent500,
-                unselectedColor: context.colors.labelInactive,
-              ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }
