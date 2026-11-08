@@ -22,6 +22,7 @@ class AppHeader extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.overlay,
+    this.trailing,
   });
 
   final bool collapsed;
@@ -34,6 +35,7 @@ class AppHeader extends StatefulWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final Widget? overlay;
+  final Widget? trailing;
 
   static const double controlSize = TwSpacing.s12;
   static const double height = controlSize;
@@ -80,8 +82,11 @@ class _AppHeaderState extends State<AppHeader> {
     final colors = context.colors;
     final width = MediaQuery.sizeOf(context).width;
     final collapsed = widget.collapsed;
-    final side = widget.showActions ? _side : AppHeader.gutter;
-    final searchWidth = width - 2 * side;
+    final leftSide = widget.showActions ? _side : AppHeader.gutter;
+    final rightSide = widget.showActions || widget.trailing != null
+        ? _side
+        : AppHeader.gutter;
+    final searchWidth = width - leftSide - rightSide;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -116,7 +121,19 @@ class _AppHeaderState extends State<AppHeader> {
               hintText: widget.hintText,
             ).center().translate(offset: Offset(collapsed ? -width : 0, 0)),
           ),
-        ).positioned(left: side, right: side, top: 0, height: AppHeader.height),
+        ).positioned(
+          left: leftSide,
+          right: rightSide,
+          top: 0,
+          height: AppHeader.height,
+        ),
+        if (widget.trailing != null && !widget.showActions)
+          widget.trailing!.positioned(
+            right: AppHeader.gutter,
+            top: 0,
+            width: _button,
+            height: AppHeader.height,
+          ),
         ?widget.overlay,
         if (widget.showActions)
           const IgnorePointer(child: Center(child: _BasketBadge())).positioned(

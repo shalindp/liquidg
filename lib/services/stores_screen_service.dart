@@ -23,6 +23,8 @@ class StoresScreenService {
   StoresScreenService(this._stores, this._location);
 
   static const Duration searchDebounce = Duration(milliseconds: 350);
+  static const double minRadiusKm = 1;
+  static const double maxRadiusKm = 30;
   static const Duration messageDuration = Duration(seconds: 3);
   static const String minimumStoreMessage =
       'Keep at least one store picked so we can hunt down the best prices for you.';
@@ -33,6 +35,7 @@ class StoresScreenService {
   final status = signal(StoresMapStatus.loading);
   final userLocation = signal<LatLng?>(null);
   final filters = signal<Set<Supermarket>>(const {});
+  final radiusKm = signal<double?>(null);
   final trayExpanded = signal(false);
   final query = signal('');
   final message = signal<String?>(null);
@@ -52,12 +55,29 @@ class StoresScreenService {
 
   late final visible = computed(() {
     final active = filters.value;
-    if (active.isEmpty) return distances.value;
+    final radius = radiusKm.value;
     return [
       for (final entry in distances.value)
-        if (active.contains(entry.store.supermarket)) entry,
+        if ((active.isEmpty || active.contains(entry.store.supermarket)) &&
+            (radius == null || entry.kilometres <= radius))
+          entry,
     ];
   });
+
+  late final chainCounts = computed(() {
+    final radius = radiusKm.value;
+    final counts = {for (final chain in Supermarket.values) chain: 0};
+    for (final entry in distances.value) {
+      if (radius == null || entry.kilometres <= radius) {
+        counts[entry.store.supermarket] = counts[entry.store.supermarket]! + 1;
+      }
+    }
+    return counts;
+  });
+
+  late final activeFilterCount = computed(
+    () => filters.value.length + (radiusKm.value == null ? 0 : 1),
+  );
 
   late final selectedIds = computed(
     () => {for (final store in _stores.selected.value) store.id},
@@ -146,6 +166,22 @@ class StoresScreenService {
         : {...current, supermarket};
   }
 
+  void setRadius(double? km) {
+    if (_disposed) return;
+    radiusKm.value = km == null || km >= maxRadiusKm ? null : km;
+  }
+
+  void resetFilters() {
+    if (_disposed) return;
+    filters.value = const {};
+    radiusKm.value = null;
+  }
+
+  void setAllSupermarkets({required bool on}) {
+    if (_disposed) return;
+    filters.value = on ? const {} : {...Supermarket.values};
+  }
+
   void clearFilters() {
     if (_disposed) return;
     filters.value = const {};
@@ -197,6 +233,9 @@ class StoresScreenService {
     _messageTimer?.cancel();
     distances.dispose();
     visible.dispose();
+    chainCounts.dispose();
+    activeFilterCount.dispose();
+    radiusKm.dispose();
     selectedIds.dispose();
     selectedEntries.dispose();
     results.dispose();

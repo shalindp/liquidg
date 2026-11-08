@@ -62,6 +62,7 @@ class _StoresMapView extends StatelessWidget {
           );
         }
         final visible = service.visible.value;
+        final radius = service.radiusKm.value;
         final selectedIds = service.selectedIds.value;
         final entries = service.selectedEntries.value;
         final searching =
@@ -101,6 +102,23 @@ class _StoresMapView extends StatelessWidget {
                       maxNativeZoom: _maxNativeZoom,
                       retinaMode: RetinaMode.isHighDensity(context),
                     ),
+                    if (radius != null)
+                      CircleLayer(
+                        circles: [
+                          CircleMarker(
+                            point: location,
+                            radius: radius * 1000,
+                            useRadiusInMeter: true,
+                            color: BrandColors.accent500.withValues(
+                              alpha: 0.08,
+                            ),
+                            borderColor: BrandColors.accent500.withValues(
+                              alpha: 0.6,
+                            ),
+                            borderStrokeWidth: 1.5,
+                          ),
+                        ],
+                      ),
                     MarkerLayer(
                       markers: [
                         for (final entry in visible)
