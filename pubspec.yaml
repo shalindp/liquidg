@@ -41,6 +41,10 @@ dependencies:
   hugeicons: ^4.4.0
   styled_widget: ^0.4.1
   signals_flutter: ^7.1.0
+  signals: ^7.1.0
+  dio: ^5.11.1
+  ominicart_api:
+    path: /Users/shalinda/__dev/go-omnicart-api/clients/dart/ominicart_api
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -64,6 +68,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - env.json
     - assets/icons/
     - assets/icons/nav/
     - assets/illustrations/
