@@ -13,8 +13,9 @@ class _TitleRow extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: context.colors.textPrimary,
-        fontSize: TwFontSize.base,
-        fontWeight: TwFontWeight.semibold,
+        fontSize: TwFontSize.sm,
+        fontWeight: TwFontWeight.medium,
+        height: 1.2,
       ),
     ).padding(right: TwSpacing.s6);
   }

@@ -6,4 +6,6 @@ class ClientService {
   ClientService(Env env) : api = OminicartApi(basePathOverride: env.apiBaseUrl);
 
   final OminicartApi api;
+
+  String get baseUrl => api.dio.options.baseUrl;
 }

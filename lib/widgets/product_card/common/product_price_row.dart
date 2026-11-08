@@ -3,13 +3,17 @@ part of '../product_card.dart';
 class _PriceRow extends StatelessWidget {
   const _PriceRow({
     required this.price,
+    required this.chain,
     required this.store,
     required this.unitPrice,
+    required this.controller,
   });
 
   final ProductPrice price;
+  final Supermarket chain;
   final String store;
   final String unitPrice;
+  final ProductCardController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -29,18 +33,19 @@ class _PriceRow extends StatelessWidget {
                 fontSize: TwFontSize.xs,
               ),
             ),
-            _LowestStore(name: store),
+            _LowestStore(chain: chain, name: store),
           ],
         ).padding(right: TwSpacing.s2).expanded(),
-        const _AddButton(),
+        _AddButton(controller: controller),
       ],
     );
   }
 }
 
 class _LowestStore extends StatelessWidget {
-  const _LowestStore({required this.name});
+  const _LowestStore({required this.chain, required this.name});
 
+  final Supermarket chain;
   final String name;
 
   @override
@@ -48,21 +53,15 @@ class _LowestStore extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(
-          'assets/icons/woolworths_logo.png',
-          width: TwSpacing.s3,
-          height: TwSpacing.s3,
-          fit: BoxFit.contain,
-          filterQuality: FilterQuality.medium,
-        ),
+        _SupermarketLogo(chain: chain, size: TwSpacing.s4),
         const SizedBox(width: TwSpacing.s1_5),
         Text(
           name,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
-            color: context.colors.textSecondary,
-            fontSize: TwFontSize.xs,
+            color: context.colors.textPrimary,
+            fontSize: TwFontSize.sm,
             fontWeight: TwFontWeight.medium,
           ),
         ).flexible(),
@@ -109,23 +108,65 @@ class _Price extends StatelessWidget {
 }
 
 class _AddButton extends StatelessWidget {
-  const _AddButton();
+  const _AddButton({required this.controller});
+
+  final ProductCardController controller;
+
+  Future<void> _openSheet(BuildContext context) async {
+    HapticFeedback.lightImpact();
+    final quantity = await showModalBottomSheet<int>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (context) => _AddToCartSheet(controller: controller),
+    );
+    if (quantity != null) {
+      controller.setQuantity(quantity);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () {},
-      style: FilledButton.styleFrom(
-        backgroundColor: BrandColors.accent500,
-        foregroundColor: context.colors.textOnAccent,
-        minimumSize: const Size(TwSpacing.s24, TwSpacing.s11),
-        shape: const StadiumBorder(),
-        textStyle: const TextStyle(
-          fontSize: TwFontSize.sm,
-          fontWeight: TwFontWeight.medium,
-        ),
-      ),
-      child: const Text('Add'),
+    final colors = context.colors;
+    return SignalBuilder(
+      builder: (context) {
+        final count = controller.quantity.value;
+        final inBasket = controller.hasQuantity.value;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(TwRadius.full),
+            boxShadow: inBasket
+                ? null
+                : [
+                    BoxShadow(
+                      color: colors.textPrimary.withValues(alpha: 0.15),
+                      blurRadius: TwSpacing.s2,
+                    ),
+                  ],
+          ),
+          child: FilledButton(
+            onPressed: () => _openSheet(context),
+            style: FilledButton.styleFrom(
+              backgroundColor: inBasket
+                  ? Colors.transparent
+                  : BrandColors.accent500,
+              foregroundColor: inBasket
+                  ? BrandColors.accent500
+                  : colors.textOnAccent,
+              side: const BorderSide(color: BrandColors.accent500),
+              minimumSize: const Size(TwSpacing.s24, TwSpacing.s11),
+              padding: const EdgeInsets.symmetric(horizontal: TwSpacing.s4),
+              shape: const StadiumBorder(),
+              textStyle: const TextStyle(
+                fontSize: TwFontSize.sm,
+                fontWeight: TwFontWeight.medium,
+              ),
+            ),
+            child: Text(inBasket ? 'In basket ($count)' : 'Add'),
+          ),
+        );
+      },
     );
   }
 }

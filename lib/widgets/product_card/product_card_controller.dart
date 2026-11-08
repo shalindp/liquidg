@@ -1,21 +1,7 @@
 import 'package:signals_flutter/signals_flutter.dart';
 
-class StorePrice {
-  const StorePrice({
-    required this.chain,
-    required this.branch,
-    required this.price,
-  });
-
-  final String chain;
-  final String branch;
-  final double price;
-
-  String get label => '\$${price.toStringAsFixed(2)}';
-
-  String deltaFrom(double lowest) =>
-      '+\$${(price - lowest).toStringAsFixed(2)}';
-}
+import '../../models/product_item.dart';
+import '../../services/product_card_service.dart';
 
 class ProductPrice {
   const ProductPrice({required this.dollars, required this.cents});
@@ -30,29 +16,27 @@ class ProductPrice {
 }
 
 class ProductCardController {
-  ProductCardController({required this.name, required this.imageUrl});
+  ProductCardController(this.item, this._basket)
+    : lowestStore = item.stores.first,
+      stores = item.stores.skip(1).toList(growable: false);
 
   static const int collapsedLimit = 3;
   static const int expandedLimit = 6;
 
-  final String name;
-  final String? imageUrl;
-  final lowestStore = const StorePrice(
-    chain: 'Woolworths',
-    branch: 'Northlands',
-    price: 16.79,
-  );
-  late final lowestPrice = ProductPrice.of(lowestStore.price);
-  final unitPrice = '(\$8.40/L)';
-  final stores = const <StorePrice>[
-    StorePrice(chain: 'Woolworths', branch: 'Alexandra', price: 17.20),
-    StorePrice(chain: 'Woolworths', branch: 'Preston', price: 17.45),
-    StorePrice(chain: 'Woolworths', branch: 'Reservoir', price: 17.90),
-    StorePrice(chain: 'Woolworths', branch: 'Thornbury', price: 18.10),
-    StorePrice(chain: 'Woolworths', branch: 'Coburg', price: 18.35),
-    StorePrice(chain: 'Woolworths', branch: 'Brunswick', price: 18.80),
-    StorePrice(chain: 'Woolworths', branch: 'Fitzroy', price: 19.40),
-  ];
+  final ProductItem item;
+  final ProductCardService _basket;
+  final StorePrice lowestStore;
+  final List<StorePrice> stores;
+
+  String get name => '${item.name} ${item.packSize}';
+  String? get imageUrl => item.imageUrl;
+  late final String unitPrice =
+      '\$${(lowest / 10).toStringAsFixed(2)} per 100g';
+  late final double lowest = lowestStore.price!;
+  late final lowestPrice = ProductPrice.of(lowest);
+
+  late final quantity = computed(() => _basket.quantityOf(item.id));
+  late final hasQuantity = computed(() => quantity.value > 0);
 
   final favourite = signal(false);
   final storesExpanded = signal(false);
@@ -67,11 +51,15 @@ class ProductCardController {
 
   bool get canExpand => stores.length > collapsedLimit;
 
+  void setQuantity(int value) => _basket.setQuantity(item.id, value);
+
   void toggleFavourite() => favourite.value = !favourite.value;
 
   void toggleStores() => storesExpanded.value = !storesExpanded.value;
 
   void dispose() {
+    quantity.dispose();
+    hasQuantity.dispose();
     favourite.dispose();
     storesExpanded.dispose();
     visibleLimit.dispose();

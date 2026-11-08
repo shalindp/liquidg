@@ -3,12 +3,18 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../../theme/theme.dart';
+import '../../models/product_item.dart';
+import '../../models/supermarket.dart';
+import '../../service_locator.dart';
+import '../../services/product_card_service.dart';
 import 'product_card_controller.dart';
 
 part 'common/product_image.dart';
@@ -16,12 +22,12 @@ part 'common/product_title_row.dart';
 part 'common/product_price_row.dart';
 part 'common/store_label.dart';
 part 'common/store_prices.dart';
+part 'common/add_to_cart_sheet.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key, required this.name, this.imageUrl});
+  const ProductCard({super.key, required this.item});
 
-  final String name;
-  final String? imageUrl;
+  final ProductItem item;
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -29,8 +35,8 @@ class ProductCard extends StatefulWidget {
 
 class _ProductCardState extends State<ProductCard> {
   late final _controller = ProductCardController(
-    name: widget.name,
-    imageUrl: widget.imageUrl,
+    widget.item,
+    getIt<ProductCardService>(),
   );
 
   @override
@@ -64,8 +70,10 @@ class _ProductCardState extends State<ProductCard> {
                         const SizedBox(height: TwSpacing.s0),
                         _PriceRow(
                           price: c.lowestPrice,
+                          chain: c.lowestStore.chain,
                           store: c.lowestStore.branch,
                           unitPrice: c.unitPrice,
+                          controller: c,
                         ),
                       ],
                     ).padding(left: TwSpacing.s2).expanded(),

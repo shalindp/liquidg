@@ -26,7 +26,7 @@ class _StorePrices extends StatelessWidget {
           child: Column(
             children: [
               _StoreList(
-                lowest: c.lowestStore.price,
+                lowest: c.lowest,
                 stores: c.stores,
                 count: count,
                 scrollable: scrollable,
@@ -106,23 +106,28 @@ class _StoreRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final delta = store.deltaFrom(lowest);
     return Row(
           children: [
             _StoreLabel(store: store).expanded(),
-            Text(
-              store.deltaFrom(lowest),
-              style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: TwFontSize.xs,
-                fontWeight: TwFontWeight.normal,
+            if (delta != null) ...[
+              Text(
+                delta,
+                style: TextStyle(
+                  color: colors.textSecondary,
+                  fontSize: TwFontSize.xs,
+                  fontWeight: TwFontWeight.normal,
+                ),
               ),
-            ),
-            const SizedBox(width: TwSpacing.s2),
+              const SizedBox(width: TwSpacing.s2),
+            ],
             Text(
               store.label,
               style: TextStyle(
-                color: colors.textPrimary,
-                fontSize: TwFontSize.sm,
+                color: store.available
+                    ? colors.textPrimary
+                    : colors.textSecondary.withValues(alpha: 0.6),
+                fontSize: store.available ? TwFontSize.sm : TwFontSize.xs,
                 fontWeight: TwFontWeight.normal,
               ),
             ),

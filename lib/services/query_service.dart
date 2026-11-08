@@ -43,5 +43,14 @@ class QueryService {
     });
   }
 
+  Mutation<AuthResponse?, LoginRequest> useLogin() {
+    return _query.useMutation((LoginRequest request) async {
+      final response = await _client.api.getAuthApi().login(
+        loginRequest: request,
+      );
+      return response.data;
+    });
+  }
+
   void dispose() => _query.dispose();
 }

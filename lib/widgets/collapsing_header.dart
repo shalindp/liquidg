@@ -247,7 +247,7 @@ class _SearchField extends StatelessWidget {
             ),
           ],
           padding: const WidgetStatePropertyAll(
-            EdgeInsets.symmetric(horizontal: TwSpacing.s3),
+            EdgeInsetsDirectional.only(start: TwSpacing.s3, end: TwSpacing.s1),
           ),
         )
         .constrained(width: width, height: CollapsingHeader.fieldHeight)

@@ -1,13 +1,16 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 
 import 'config/env.dart';
 import 'query/query.dart';
 import 'router.dart';
 import 'service_locator.dart';
+import 'services/auth_service.dart';
 import 'services/client_service.dart';
+import 'services/product_card_service.dart';
 import 'services/products_screen_service.dart';
 import 'services/query_service.dart';
 import 'theme/theme.dart';
@@ -24,10 +27,19 @@ Future<void> main() async {
     QueryService(getIt<ClientService>(), Query()),
     dispose: (service) => service.dispose(),
   );
-  getIt.registerSingleton<ProductsScreenService>(
-    ProductsScreenService(getIt<QueryService>()),
+  getIt.registerSingleton<AuthService>(
+    AuthService(getIt<ClientService>(), getIt<QueryService>()),
     dispose: (service) => service.dispose(),
   );
+  getIt.registerSingleton<ProductCardService>(
+    ProductCardService(),
+    dispose: (service) => service.dispose(),
+  );
+  getIt.registerSingleton<ProductsScreenService>(
+    ProductsScreenService(getIt<ClientService>(), getIt<QueryService>()),
+    dispose: (service) => service.dispose(),
+  );
+  await getIt<AuthService>().login();
   runApp(const MyApp());
 }
 
@@ -47,7 +59,19 @@ class MyApp extends StatelessWidget {
         darkTheme: AppTheme.dark,
         themeMode: mode,
         routerConfig: router,
-        builder: (context, child) => AppMixScope(child: child!),
+        builder: (context, child) {
+          final dark = Theme.brightnessOf(context) == Brightness.dark;
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              statusBarColor: Colors.transparent,
+              statusBarIconBrightness: dark
+                  ? Brightness.light
+                  : Brightness.dark,
+              statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+            ),
+            child: AppMixScope(child: child!),
+          );
+        },
       ),
     );
   }

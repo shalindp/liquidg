@@ -3,7 +3,7 @@ part of '../product_card.dart';
 class _ProductImage extends StatelessWidget {
   const _ProductImage({required this.url});
 
-  static const double size = 79;
+  static const double size = 72;
 
   final String? url;
 

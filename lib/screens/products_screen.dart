@@ -16,12 +16,28 @@ class ProductsScreen extends StatefulWidget {
 }
 
 class _ProductsScreenState extends State<ProductsScreen> {
+  static const double _loadMoreThreshold = 2000;
+
   final _service = getIt<ProductsScreenService>();
+  final _scroll = ScrollController();
 
   @override
   void initState() {
     super.initState();
-    _service.load();
+    _scroll.addListener(_onScroll);
+    _service.loadMore();
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scroll.position.extentAfter < _loadMoreThreshold) {
+      _service.loadMore();
+    }
   }
 
   @override
@@ -43,26 +59,47 @@ class _ProductsScreenState extends State<ProductsScreen> {
             onRetry: _service.refresh,
           );
         }
+        final footer = _service.loading.value || _service.error.value != null;
         return ListView.separated(
+          controller: _scroll,
           padding: padding,
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           scrollCacheExtent: const ScrollCacheExtent.viewport(1),
-          itemCount: products.length,
+          itemCount: products.length + (footer ? 1 : 0),
           separatorBuilder: (_, _) => const SizedBox(height: TwSpacing.s3),
           itemBuilder: (context, i) {
-            final product = products[i];
-            return ProductCard(
-              key: ValueKey(product.productId),
-              name: product.name,
-              imageUrl: product.imageUrls.isEmpty
-                  ? null
-                  : product.imageUrls.first,
-            );
+            if (i == products.length) {
+              return _Footer(
+                error: _service.error.value != null,
+                onRetry: _service.loadMore,
+              );
+            }
+            final item = products[i];
+            return ProductCard(key: ValueKey(item.id), item: item);
           },
         );
       },
+    );
+  }
+}
+
+class _Footer extends StatelessWidget {
+  const _Footer({required this.error, required this.onRetry});
+
+  final bool error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: error
+          ? TextButton(onPressed: onRetry, child: const Text('Retry'))
+          : const Padding(
+              padding: EdgeInsets.all(TwSpacing.s4),
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

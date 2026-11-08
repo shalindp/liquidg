@@ -41,6 +41,7 @@ dependencies:
   hugeicons: ^4.4.0
   styled_widget: ^0.4.1
   signals_flutter: ^7.1.0
+  numberpicker: ^2.1.2
   signals: ^7.1.0
   get_it: ^9.3.0
   dio: ^5.11.1

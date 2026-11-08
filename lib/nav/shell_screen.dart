@@ -7,9 +7,12 @@ import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
+import '../service_locator.dart';
+import '../services/products_screen_service.dart';
 import '../theme/theme.dart';
 import '../widgets/chrome_collapse_controller.dart';
 import '../widgets/collapsing_header.dart';
+import '../widgets/status_bar_blur.dart';
 import 'nav_tab.dart';
 import 'routes.dart';
 
@@ -103,6 +106,7 @@ class _ShellScreenState extends State<ShellScreen> {
                   ? CollapsingHeader(
                       collapsed: collapsed,
                       onExpand: _chrome.expand,
+                      onChanged: getIt<ProductsScreenService>().onSearchChanged,
                     )
                   : LiquidGlassAppBar(
                       title: Text(route.title),
@@ -129,9 +133,19 @@ class _ShellScreenState extends State<ShellScreen> {
                     height: CollapsingHeader.heightOf(context) + TwSpacing.s2,
                   ),
               ],
-              body: NotificationListener<ScrollNotification>(
-                onNotification: _chrome.onScroll,
-                child: widget.navigationShell,
+              body: Stack(
+                children: [
+                  NotificationListener<ScrollNotification>(
+                    onNotification: _chrome.onScroll,
+                    child: widget.navigationShell,
+                  ).positioned(left: 0, right: 0, top: 0, bottom: 0),
+                  const Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: StatusBarBlur(),
+                  ),
+                ],
               ),
               bottomNavigationBar: LiquidGlassTabBar(
                 items: folded ? [_iconOnlyTabs[index]] : _tabs,
