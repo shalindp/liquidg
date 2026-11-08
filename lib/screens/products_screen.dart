@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 
 import '../theme/theme.dart';
 import '../widgets/collapsing_header.dart';
@@ -19,6 +20,7 @@ class ProductsScreen extends StatelessWidget {
       physics: const BouncingScrollPhysics(
         parent: AlwaysScrollableScrollPhysics(),
       ),
+      scrollCacheExtent: const ScrollCacheExtent.viewport(1),
       itemCount: 300,
       separatorBuilder: (_, _) => const SizedBox(height: TwSpacing.s3),
       itemBuilder: (context, i) => const ProductCard(),

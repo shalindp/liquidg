@@ -48,10 +48,12 @@ class _LowestStore extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        SvgPicture.asset(
-          'assets/icons/woolworths_logo.svg',
+        Image.asset(
+          'assets/icons/woolworths_logo.png',
           width: TwSpacing.s3,
           height: TwSpacing.s3,
+          fit: BoxFit.contain,
+          filterQuality: FilterQuality.medium,
         ),
         const SizedBox(width: TwSpacing.s1_5),
         Text(

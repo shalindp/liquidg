@@ -91,15 +91,17 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
           onPressed: widget.onBasketPressed,
           child: _Basket(color: BrandColors.accent500),
         ).positioned(right: CollapsingHeader.gutter, top: 0),
-        Visibility(
-          visible: !collapsed,
-          maintainState: true,
-          child: _SearchField(
-            width: searchWidth,
-            controller: _controller,
-            focusNode: _focus,
-            onChanged: widget.onChanged,
-          ).center(),
+        IgnorePointer(
+          ignoring: collapsed,
+          child: ExcludeSemantics(
+            excluding: collapsed,
+            child: _SearchField(
+              width: searchWidth,
+              controller: _controller,
+              focusNode: _focus,
+              onChanged: widget.onChanged,
+            ).center().translate(offset: Offset(collapsed ? -width : 0, 0)),
+          ),
         ).positioned(
           left: _side,
           right: _side,

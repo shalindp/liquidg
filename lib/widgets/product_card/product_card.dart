@@ -14,6 +14,7 @@ import 'product_card_controller.dart';
 part 'common/product_image.dart';
 part 'common/product_title_row.dart';
 part 'common/product_price_row.dart';
+part 'common/store_label.dart';
 part 'common/store_prices.dart';
 
 class ProductCard extends StatefulWidget {
@@ -46,8 +47,10 @@ class _ProductCardState extends State<ProductCard> {
             Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _ProductImage(url: c.imageUrl)
-                        .constrained(width: 79, height: 79),
+                    _ProductImage(url: c.imageUrl).constrained(
+                      width: _ProductImage.size,
+                      height: _ProductImage.size,
+                    ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -69,7 +72,7 @@ class _ProductCardState extends State<ProductCard> {
                   boxShadow: [
                     BoxShadow(
                       color: colors.textPrimary.withValues(alpha: 0.04),
-                      blurRadius: TwSpacing.s3,
+                      blurRadius: TwSpacing.s1_5,
                     ),
                   ],
                 ),

@@ -15,76 +15,48 @@ class _StorePrices extends StatelessWidget {
     final colors = context.colors;
     final c = controller;
     return SignalBuilder(
-          builder: (context) {
-            final height = c.visibleCount.value * _rowHeight;
-            final expanded = c.storesExpanded.value;
-            return AnimatedSize(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              child: Column(
-                children: [
-                  _StoreList(
-                    lowest: c.lowestStore.price,
-                    stores: c.stores,
-                    height: height,
-                    scrollable: expanded,
-                  ),
-                  if (c.canExpand)
-                    _SeeMoreButton(
-                      expanded: expanded,
-                      onPressed: c.toggleStores,
-                    ),
-                ],
+      builder: (context) {
+        final expanded = c.storesExpanded.value;
+        final count = c.visibleCount.value;
+        final scrollable =
+            expanded && c.stores.length > ProductCardController.expandedLimit;
+        return AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutCubic,
+          child: Column(
+            children: [
+              _StoreList(
+                lowest: c.lowestStore.price,
+                stores: c.stores,
+                count: count,
+                scrollable: scrollable,
               ),
-            );
-          },
-        )
-        .decorated(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(TwRadius.xl2),
-          border: Border.all(color: _hairline(colors), width: _hairlineWidth),
-        )
-        .clipRRect(all: TwRadius.xl2);
+              if (c.canExpand)
+                _SeeMoreButton(expanded: expanded, onPressed: c.toggleStores),
+            ],
+          ),
+        );
+      },
+    ).decorated(
+      color: colors.surface,
+      borderRadius: BorderRadius.circular(TwRadius.xl2),
+      border: Border.all(color: _hairline(colors), width: _hairlineWidth),
+    );
   }
 }
 
-class _StoreList extends StatefulWidget {
+class _StoreList extends StatelessWidget {
   const _StoreList({
     required this.lowest,
     required this.stores,
-    required this.height,
+    required this.count,
     required this.scrollable,
   });
 
   final double lowest;
   final List<StorePrice> stores;
-  final double height;
+  final int count;
   final bool scrollable;
-
-  @override
-  State<_StoreList> createState() => _StoreListState();
-}
-
-class _StoreListState extends State<_StoreList> {
-  final _scroll = ScrollController();
-
-  @override
-  void didUpdateWidget(_StoreList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scrollable && !widget.scrollable && _scroll.hasClients) {
-      _scroll.animateTo(
-        0,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
 
   bool _handOver(BuildContext context, OverscrollNotification n) {
     final outer = Scrollable.maybeOf(context)?.position;
@@ -97,25 +69,26 @@ class _StoreListState extends State<_StoreList> {
     return false;
   }
 
+  Widget _row(int i) => SizedBox(
+    height: _rowHeight,
+    child: _StoreRow(store: stores[i], lowest: lowest, divider: i > 0),
+  );
+
   @override
   Widget build(BuildContext context) {
+    if (!scrollable) {
+      return Column(children: [for (var i = 0; i < count; i++) _row(i)]);
+    }
     return NotificationListener<OverscrollNotification>(
       onNotification: (n) => _handOver(context, n),
       child: ListView.builder(
-        controller: _scroll,
         padding: EdgeInsets.zero,
-        physics: widget.scrollable
-            ? const ClampingScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         itemExtent: _rowHeight,
-        itemCount: widget.stores.length,
-        itemBuilder: (context, i) => _StoreRow(
-          store: widget.stores[i],
-          lowest: widget.lowest,
-          divider: i > 0,
-        ),
+        itemCount: stores.length,
+        itemBuilder: (context, i) => _row(i),
       ),
-    ).constrained(height: widget.height);
+    ).constrained(height: count * _rowHeight);
   }
 }
 
@@ -135,33 +108,7 @@ class _StoreRow extends StatelessWidget {
     final colors = context.colors;
     return Row(
           children: [
-            SvgPicture.asset(
-              'assets/icons/woolworths_logo.svg',
-              width: TwSpacing.s4,
-              height: TwSpacing.s4,
-            ),
-            const SizedBox(width: TwSpacing.s3),
-            Text.rich(
-              TextSpan(
-                text: '${store.chain} ',
-                style: TextStyle(
-                  fontSize: TwFontSize.xs,
-                  fontWeight: TwFontWeight.normal,
-                ),
-                children: [
-                  TextSpan(
-                    text: store.branch,
-                    style: TextStyle(
-                      fontSize: TwFontSize.sm,
-                      fontWeight: TwFontWeight.normal,
-                    ),
-                  ),
-                ],
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(color: colors.textPrimary),
-            ).expanded(),
+            _StoreLabel(store: store).expanded(),
             Text(
               store.deltaFrom(lowest),
               style: TextStyle(
