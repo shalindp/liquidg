@@ -15,6 +15,7 @@ import '../../models/product_item.dart';
 import '../../models/supermarket.dart';
 import '../../service_locator.dart';
 import '../../services/products_screen_service.dart';
+import '../supermarket_logo.dart';
 import 'product_card_controller.dart';
 
 part 'common/product_image.dart';

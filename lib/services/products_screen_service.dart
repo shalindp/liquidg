@@ -4,13 +4,18 @@ import 'package:ominicart_api/ominicart_api.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
 import '../models/product_item.dart';
-import '../models/selected_store.dart';
-import '../models/supermarket.dart';
+import '../models/store_location.dart';
 import 'client_service.dart';
 import 'query_service.dart';
+import 'stores_service.dart';
 
 class ProductsScreenService {
-  ProductsScreenService(this._client, this._queries);
+  ProductsScreenService(this._client, this._queries, this._stores) {
+    _disposeSelection = _stores.appliedIds.subscribe((_) {
+      if (_selectionSeen) _reset();
+      _selectionSeen = true;
+    });
+  }
 
   static const int pageSize = 8;
   static const int maxQuantity = 99;
@@ -20,38 +25,9 @@ class ProductsScreenService {
   static final RegExp _leadingNumber = RegExp(r'^#\d+\s*');
   static final RegExp _primaryImage = RegExp(r'_1\.webp$');
 
-  static const selectedStores = <SelectedStore>[
-    SelectedStore(
-      id: 159,
-      supermarket: Supermarket.woolworths,
-      branch: 'Glenfield',
-    ),
-    SelectedStore(
-      id: 158,
-      supermarket: Supermarket.woolworths,
-      branch: 'Northcote',
-    ),
-    SelectedStore(
-      id: 160,
-      supermarket: Supermarket.woolworths,
-      branch: 'Takapuna',
-    ),
-    SelectedStore(id: 208, supermarket: Supermarket.paknsave, branch: 'Albany'),
-    SelectedStore(
-      id: 203,
-      supermarket: Supermarket.paknsave,
-      branch: 'Silverdale',
-    ),
-    SelectedStore(id: 291, supermarket: Supermarket.newWorld, branch: 'Albany'),
-    SelectedStore(
-      id: 264,
-      supermarket: Supermarket.newWorld,
-      branch: 'Browns Bay',
-    ),
-  ];
-
   final ClientService _client;
   final QueryService _queries;
+  final StoresService _stores;
 
   final quantities = signal<Map<String, int>>(const {});
   late final totalCount = computed(
@@ -76,6 +52,8 @@ class ProductsScreenService {
     quantities.value = updated;
   }
 
+  late final void Function() _disposeSelection;
+  bool _selectionSeen = false;
   Timer? _debounce;
   String _searchTerm = initialSearchTerm;
   int _skip = 0;
@@ -114,28 +92,33 @@ class ProductsScreenService {
     final generation = _generation;
     loading.value = true;
     error.value = null;
+    if (!await _stores.ensureLoaded()) {
+      if (!_disposed && generation == _generation) {
+        error.value = _stores.error.value ?? StateError('No stores');
+        loading.value = false;
+      }
+      return;
+    }
+    if (_disposed || generation != _generation) return;
+    final selected = _stores.applied.value;
     final query = _queries.useGetProducts(
       searchTerm: _searchTerm,
       skip: _skip,
       limit: pageSize,
-      storeIds: [for (final store in selectedStores) store.id],
+      storeIds: [for (final store in selected) store.id],
     );
     try {
       final page = await query.trigger(force: force);
       if (_disposed || generation != _generation) return;
       if (page == null) {
         final failure = query.$error.value;
-        if (failure != null) {
-          error.value = failure;
-        } else {
-          hasMore.value = false;
-        }
+        if (failure != null) error.value = failure;
         return;
       }
       final received = page.products;
       products.value = [
         ...products.value,
-        for (final product in received) ?_toItem(product),
+        for (final product in received) ?_toItem(product, selected),
       ];
       _skip = page.skip + received.length;
       hasMore.value = received.isNotEmpty && _skip < page.total;
@@ -147,10 +130,10 @@ class ProductsScreenService {
     }
   }
 
-  ProductItem? _toItem(ProductSummary product) {
+  ProductItem? _toItem(ProductSummary product, List<StoreLocation> selected) {
     final priced = <StorePrice>[];
     final unavailable = <StorePrice>[];
-    for (final store in selectedStores) {
+    for (final store in selected) {
       final cents = _cents(product, store.id);
       final entry = StorePrice(
         chain: store.supermarket,
@@ -190,6 +173,7 @@ class ProductsScreenService {
 
   void dispose() {
     _disposed = true;
+    _disposeSelection();
     _debounce?.cancel();
     _generation++;
     totalCount.dispose();

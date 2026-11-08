@@ -53,7 +53,7 @@ class _LowestStore extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _SupermarketLogo(chain: chain, size: TwSpacing.s4),
+        SupermarketLogo(chain: chain, size: TwSpacing.s4),
         const SizedBox(width: TwSpacing.s1_5),
         Text(
           name,

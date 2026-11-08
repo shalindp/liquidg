@@ -9,10 +9,26 @@ enum Supermarket {
   final String logoAsset;
   final double logoScale;
 
+  RegExp get namePattern => switch (this) {
+    Supermarket.woolworths => RegExp('woolworths', caseSensitive: false),
+    Supermarket.paknsave => RegExp('pak.?n.?save', caseSensitive: false),
+    Supermarket.newWorld => RegExp(r'new\s*world', caseSensitive: false),
+  };
+
   static Supermarket? fromRetailerId(int id) => switch (id) {
     1 => Supermarket.woolworths,
     2 => Supermarket.paknsave,
     3 => Supermarket.newWorld,
     _ => null,
   };
+
+  static Supermarket? fromApiName(String name) {
+    final key = name.toLowerCase().replaceAll(RegExp('[^a-z]'), '');
+    return switch (key) {
+      'woolworths' => Supermarket.woolworths,
+      'paknsave' => Supermarket.paknsave,
+      'newworld' => Supermarket.newWorld,
+      _ => null,
+    };
+  }
 }

@@ -7,6 +7,7 @@ class QueryService {
   QueryService(this._client, this._query);
 
   static const String productsKey = 'products/list';
+  static const String storesKey = 'stores';
   static const String categoriesKey = 'products/categories';
 
   final ClientService _client;
@@ -41,6 +42,22 @@ class QueryService {
           .getProductCategories();
       return response.data;
     });
+  }
+
+  LazyQuery<List<Store>> useGetStores() {
+    return _query.useLazyQuery(storesKey, () async {
+      final response = await _client.api.getStoresApi().getStores();
+      return response.data ?? const [];
+    });
+  }
+
+  Mutation<SetUserStoresResponse?, List<int>> useSetUserStores() {
+    return _query.useMutation((List<int> storeIds) async {
+      final response = await _client.api.getStoresApi().setUserStores(
+        requestBody: storeIds,
+      );
+      return response.data;
+    }, invalidates: [productsKey]);
   }
 
   Mutation<AuthResponse?, LoginRequest> useLogin() {

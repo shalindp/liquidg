@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -9,10 +7,13 @@ import 'package:styled_widget/styled_widget.dart';
 
 import '../service_locator.dart';
 import '../services/products_screen_service.dart';
+import '../services/stores_screen_service.dart';
 import '../theme/theme.dart';
 import '../widgets/chrome_collapse_controller.dart';
+import '../widgets/app_header.dart';
 import '../widgets/collapsing_header.dart';
 import '../widgets/status_bar_blur.dart';
+import 'nav_metrics.dart';
 import 'nav_tab.dart';
 import 'routes.dart';
 
@@ -49,7 +50,7 @@ class ShellScreen extends StatefulWidget {
   State<ShellScreen> createState() => _ShellScreenState();
 }
 
-const double _navHeight = 68;
+const double _navHeight = NavMetrics.height;
 const double _circle = CollapsingHeader.controlSize;
 
 class _ShellScreenState extends State<ShellScreen> {
@@ -75,11 +76,9 @@ class _ShellScreenState extends State<ShellScreen> {
         AppRoute.matching(GoRouterState.of(context).uri.path) ??
         NavTab.values[index].route;
     final products = route == AppRoute.products;
+    final stores = route == AppRoute.stores;
 
-    final navBottom = math.max(
-      TwSpacing.s2,
-      MediaQuery.viewPaddingOf(context).bottom + TwSpacing.s2 - TwSpacing.s4,
-    );
+    final navBottom = NavMetrics.bottomOf(context);
     final brightness = Theme.brightnessOf(context);
     final barStyle = brightness == Brightness.dark
         ? LiquidGlassTabBar.defaultDarkStyle
@@ -108,6 +107,14 @@ class _ShellScreenState extends State<ShellScreen> {
                       onExpand: _chrome.expand,
                       onChanged: getIt<ProductsScreenService>().onSearchChanged,
                     )
+                  : stores
+                  ? AppHeader(
+                      showActions: false,
+                      hintText: 'Search stores',
+                      onChanged: getIt<StoresScreenService>().onSearchChanged,
+                      onFocusChanged:
+                          getIt<StoresScreenService>().searchFocused.set,
+                    )
                   : LiquidGlassAppBar(
                       title: Text(route.title),
                       width: width - 32,
@@ -115,11 +122,11 @@ class _ShellScreenState extends State<ShellScreen> {
               appBarTopMargin:
                   MediaQuery.viewPaddingOf(context).top + TwSpacing.s2,
               lenses: [
-                if (products)
+                if (products || stores)
                   IgnorePointer(
                     child: const SizedBox.expand()
                         .backgroundColor(context.colors.background)
-                        .opacity(collapsed ? 0 : 1, animate: true)
+                        .opacity(products && collapsed ? 0 : 1, animate: true)
                         .animate(
                           collapsed
                               ? CollapsingHeader.collapseDuration

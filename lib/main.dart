@@ -10,8 +10,11 @@ import 'router.dart';
 import 'service_locator.dart';
 import 'services/auth_service.dart';
 import 'services/client_service.dart';
+import 'services/location_service.dart';
 import 'services/products_screen_service.dart';
 import 'services/query_service.dart';
+import 'services/stores_screen_service.dart';
+import 'services/stores_service.dart';
 import 'theme/theme.dart';
 
 Future<void> main() async {
@@ -30,8 +33,21 @@ Future<void> main() async {
     AuthService(getIt<ClientService>(), getIt<QueryService>()),
     dispose: (service) => service.dispose(),
   );
+  getIt.registerSingleton<LocationService>(LocationService());
+  getIt.registerSingleton<StoresService>(
+    StoresService(getIt<QueryService>()),
+    dispose: (service) => service.dispose(),
+  );
   getIt.registerSingleton<ProductsScreenService>(
-    ProductsScreenService(getIt<ClientService>(), getIt<QueryService>()),
+    ProductsScreenService(
+      getIt<ClientService>(),
+      getIt<QueryService>(),
+      getIt<StoresService>(),
+    ),
+    dispose: (service) => service.dispose(),
+  );
+  getIt.registerSingleton<StoresScreenService>(
+    StoresScreenService(getIt<StoresService>(), getIt<LocationService>()),
     dispose: (service) => service.dispose(),
   );
   await getIt<AuthService>().login();

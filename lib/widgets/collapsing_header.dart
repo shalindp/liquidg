@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
-import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
-import '../service_locator.dart';
-import '../services/products_screen_service.dart';
 import '../theme/theme.dart';
-import 'app_glass_button.dart';
+import 'app_header.dart';
 
 class CollapsingHeader extends StatefulWidget {
   const CollapsingHeader({
@@ -26,15 +21,14 @@ class CollapsingHeader extends StatefulWidget {
   final VoidCallback? onBasketPressed;
   final ValueChanged<String>? onChanged;
 
-  static const double controlSize = TwSpacing.s12;
-  static const double height = controlSize;
-  static const double fieldHeight = TwSpacing.s11;
-  static const double gutter = TwSpacing.s4;
-  static const double gap = TwSpacing.s2;
+  static const double controlSize = AppHeader.controlSize;
+  static const double height = AppHeader.height;
+  static const double fieldHeight = AppHeader.fieldHeight;
+  static const double gutter = AppHeader.gutter;
+  static const double gap = AppHeader.gap;
   static const Duration collapseDuration = Duration(milliseconds: 160);
 
-  static double heightOf(BuildContext context) =>
-      MediaQuery.viewPaddingOf(context).top + height + TwSpacing.s2;
+  static double heightOf(BuildContext context) => AppHeader.heightOf(context);
 
   @override
   State<CollapsingHeader> createState() => _CollapsingHeaderState();
@@ -42,8 +36,6 @@ class CollapsingHeader extends StatefulWidget {
 
 class _CollapsingHeaderState extends State<CollapsingHeader> {
   static const double _button = CollapsingHeader.height;
-  static const double _side =
-      CollapsingHeader.gutter + _button + CollapsingHeader.gap;
 
   final _controller = TextEditingController();
   final _focus = FocusNode();
@@ -70,152 +62,31 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-    final width = MediaQuery.sizeOf(context).width;
     final collapsed = widget.collapsed;
-    final fieldBox = width - _side - CollapsingHeader.gutter;
-    final searchWidth = fieldBox - _button - CollapsingHeader.gap;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        AppGlassButton(
-          size: _button,
-          folded: collapsed,
-          onPressed: widget.onBarcodeScanPressed,
-          child: HugeIcon(
-            icon: HugeIcons.strokeRoundedBarcodeScan,
-            color: colors.textPrimary,
-            size: 22,
-          ),
-        ).positioned(left: CollapsingHeader.gutter, top: 0),
-        AppGlassButton(
-          size: _button,
-          visible: !collapsed,
-          onPressed: widget.onBasketPressed,
-          child: _Basket(color: BrandColors.accent500),
-        ).positioned(right: CollapsingHeader.gutter, top: 0),
-        IgnorePointer(
-          ignoring: collapsed,
-          child: ExcludeSemantics(
-            excluding: collapsed,
-            child: _SearchField(
-              width: searchWidth,
-              controller: _controller,
-              focusNode: _focus,
-              onChanged: widget.onChanged,
-            ).center().translate(offset: Offset(collapsed ? -width : 0, 0)),
-          ),
-        ).positioned(
-          left: _side,
-          right: _side,
-          top: 0,
-          height: CollapsingHeader.height,
-        ),
-        IgnorePointer(
-          ignoring: !collapsed,
-          child: LiquidGlassMorph(
-            opacity: collapsed ? 1 : 0,
-            style: AppGlass.foldedStyle(Theme.brightnessOf(context)),
-            child: _Island(
-              onSearch: _openSearch,
-              onBasket: widget.onBasketPressed,
-            ),
-          ),
-        ).positioned(
-          right: CollapsingHeader.gutter,
-          top: 0,
-          width: _button * 2,
-          height: CollapsingHeader.height,
-        ),
-        const IgnorePointer(child: Center(child: _BasketBadge())).positioned(
-          right: CollapsingHeader.gutter,
-          top: 0,
-          width: _button,
-          height: CollapsingHeader.height,
-        ),
-      ],
-    ).constrained(width: width, height: CollapsingHeader.height);
-  }
-}
-
-class _Basket extends StatelessWidget {
-  const _Basket({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      'assets/icons/basket.svg',
-      width: 22,
-      height: 22,
-      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-    );
-  }
-}
-
-class _BasketBadge extends StatelessWidget {
-  const _BasketBadge();
-
-  static const double _size = 24;
-  static const double _font = 10;
-  static const int _max = 99;
-  static const Offset _offset = Offset(TwSpacing.s3, -TwSpacing.s4);
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final service = getIt<ProductsScreenService>();
-    return SignalBuilder(
-      builder: (context) {
-        final count = service.totalCount.value;
-        if (count == 0) return const SizedBox.shrink();
-        final label = count > _max ? '$_max+' : '$count';
-        return Center(
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  textHeightBehavior: const TextHeightBehavior(
-                    applyHeightToFirstAscent: false,
-                    applyHeightToLastDescent: false,
-                    leadingDistribution: TextLeadingDistribution.even,
-                  ),
-                  style: TextStyle(
-                    letterSpacing: label.length > 1 ? -0.4 : 0,
-                    fontFeatures: const [FontFeature.tabularFigures()],
-                    color: colors.textOnAccent,
-                    fontSize: _font,
-                    fontWeight: TwFontWeight.bold,
-                    height: 1,
-                  ),
-                ),
+    return AppHeader(
+      collapsed: collapsed,
+      controller: _controller,
+      focusNode: _focus,
+      onBarcodeScanPressed: widget.onBarcodeScanPressed,
+      onBasketPressed: widget.onBasketPressed,
+      onChanged: widget.onChanged,
+      overlay:
+          IgnorePointer(
+            ignoring: !collapsed,
+            child: LiquidGlassMorph(
+              opacity: collapsed ? 1 : 0,
+              style: AppGlass.foldedStyle(Theme.brightnessOf(context)),
+              child: _Island(
+                onSearch: _openSearch,
+                onBasket: widget.onBasketPressed,
               ),
-            )
-            .padding(horizontal: TwSpacing.s0_5)
-            .constrained(width: _size, height: _size)
-            .decorated(
-              color: BrandColors.accent500,
-              shape: BoxShape.circle,
-              border: Border.all(color: TwColors.white, width: 1.5),
-            )
-            .translate(offset: _offset);
-      },
-    );
-  }
-}
-
-class _SearchIcon extends StatelessWidget {
-  const _SearchIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return HugeIcon(
-      icon: HugeIcons.strokeRoundedSearch01,
-      color: context.colors.textSecondary,
-      size: 20,
+            ),
+          ).positioned(
+            right: CollapsingHeader.gutter,
+            top: 0,
+            width: _button * 2,
+            height: CollapsingHeader.height,
+          ),
     );
   }
 }
@@ -230,11 +101,11 @@ class _Island extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const _SearchIcon()
+        const HeaderSearchIcon()
             .center()
             .gestures(onTap: onSearch, behavior: HitTestBehavior.opaque)
             .expanded(),
-        _Basket(color: BrandColors.accent500)
+        HeaderBasketIcon(color: BrandColors.accent500)
             .center()
             .gestures(onTap: onBasket, behavior: HitTestBehavior.opaque)
             .expanded(),
@@ -243,80 +114,5 @@ class _Island extends StatelessWidget {
       width: CollapsingHeader.height * 2,
       height: CollapsingHeader.height,
     );
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  const _SearchField({
-    required this.width,
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-  });
-
-  final double width;
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return SearchBar(
-          controller: controller,
-          focusNode: focusNode,
-          onChanged: onChanged,
-          hintText: 'Search',
-          elevation: const WidgetStatePropertyAll(0),
-          overlayColor: const WidgetStatePropertyAll(Colors.transparent),
-          backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
-          shape: const WidgetStatePropertyAll(RoundedRectangleBorder()),
-          constraints: const BoxConstraints(
-            minHeight: CollapsingHeader.fieldHeight,
-          ),
-          textStyle: WidgetStatePropertyAll(
-            TextStyle(color: colors.textPrimary, fontSize: 16),
-          ),
-          hintStyle: WidgetStatePropertyAll(
-            TextStyle(color: colors.textSecondary, fontSize: 16),
-          ),
-          leading: const _SearchIcon(),
-          trailing: [
-            ListenableBuilder(
-              listenable: controller,
-              builder: (context, _) => controller.text.isEmpty
-                  ? const SizedBox.shrink()
-                  : IconButton(
-                      onPressed: () {
-                        controller.clear();
-                        onChanged?.call('');
-                      },
-                      visualDensity: VisualDensity.compact,
-                      style: IconButton.styleFrom(
-                        overlayColor: Colors.transparent,
-                        splashFactory: NoSplash.splashFactory,
-                      ),
-                      icon: SvgPicture.asset(
-                        'assets/icons/clear.svg',
-                        width: 20,
-                        height: 20,
-                        colorFilter: ColorFilter.mode(
-                          colors.textSecondary,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-            ),
-          ],
-          padding: const WidgetStatePropertyAll(
-            EdgeInsetsDirectional.only(start: TwSpacing.s3, end: TwSpacing.s1),
-          ),
-        )
-        .constrained(width: width, height: CollapsingHeader.fieldHeight)
-        .clipRRect(all: TwRadius.full)
-        .decorated(
-          color: colors.surfaceMuted,
-          borderRadius: BorderRadius.circular(TwRadius.full),
-        );
   }
 }
