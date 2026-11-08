@@ -2,11 +2,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
-import 'package:ominicart_api/ominicart_api.dart';
 
 import 'config/env.dart';
 import 'query/query.dart';
 import 'router.dart';
+import 'service_locator.dart';
+import 'services/client_service.dart';
 import 'theme/theme.dart';
 
 Future<void> main() async {
@@ -16,13 +17,10 @@ Future<void> main() async {
     await LiquidGlassShaders.ensureLoaded();
   }
   final env = await Env.load();
-  api = OminicartApi(basePathOverride: env.apiBaseUrl);
-  query = Query();
+  getIt.registerSingleton<ClientService>(ClientService(env));
+  getIt.registerSingleton<Query>(Query(), dispose: (query) => query.dispose());
   runApp(const MyApp());
 }
-
-late final OminicartApi api;
-late final Query query;
 
 final themeController = ThemeController();
 
