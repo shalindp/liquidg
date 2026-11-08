@@ -30,12 +30,13 @@ class ProductPrice {
 }
 
 class ProductCardController {
+  ProductCardController({required this.name, required this.imageUrl});
+
   static const int collapsedLimit = 3;
   static const int expandedLimit = 6;
 
-  final name = 'Anchor Lite Milk 2L';
-  final imageUrl =
-      'https://assets.woolworths.com.au/images/2010/282819.jpg?impolicy=wowb2bgpkhx';
+  final String name;
+  final String? imageUrl;
   final lowestStore = const StorePrice(
     chain: 'Woolworths',
     branch: 'Northlands',

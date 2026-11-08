@@ -18,14 +18,20 @@ part 'common/store_label.dart';
 part 'common/store_prices.dart';
 
 class ProductCard extends StatefulWidget {
-  const ProductCard({super.key});
+  const ProductCard({super.key, required this.name, this.imageUrl});
+
+  final String name;
+  final String? imageUrl;
 
   @override
   State<ProductCard> createState() => _ProductCardState();
 }
 
 class _ProductCardState extends State<ProductCard> {
-  final _controller = ProductCardController();
+  late final _controller = ProductCardController(
+    name: widget.name,
+    imageUrl: widget.imageUrl,
+  );
 
   @override
   void dispose() {

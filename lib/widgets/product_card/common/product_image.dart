@@ -5,22 +5,32 @@ class _ProductImage extends StatelessWidget {
 
   static const double size = 79;
 
-  final String url;
+  final String? url;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final url = this.url;
+    if (url == null) return const _ImagePlaceholder();
     return Image.network(
       url,
       fit: BoxFit.contain,
       cacheWidth: (size * MediaQuery.devicePixelRatioOf(context)).round(),
       loadingBuilder: (context, child, progress) =>
           progress == null ? child : const SizedBox.shrink(),
-      errorBuilder: (context, _, _) => HugeIcon(
-        icon: HugeIcons.strokeRoundedImage01,
-        color: colors.textSecondary,
-        size: TwSpacing.s8,
-      ).center(),
+      errorBuilder: (context, _, _) => const _ImagePlaceholder(),
     );
+  }
+}
+
+class _ImagePlaceholder extends StatelessWidget {
+  const _ImagePlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return HugeIcon(
+      icon: HugeIcons.strokeRoundedImage01,
+      color: context.colors.textSecondary,
+      size: TwSpacing.s8,
+    ).center();
   }
 }

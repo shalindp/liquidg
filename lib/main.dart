@@ -8,6 +8,8 @@ import 'query/query.dart';
 import 'router.dart';
 import 'service_locator.dart';
 import 'services/client_service.dart';
+import 'services/products_screen_service.dart';
+import 'services/query_service.dart';
 import 'theme/theme.dart';
 
 Future<void> main() async {
@@ -18,7 +20,14 @@ Future<void> main() async {
   }
   final env = await Env.load();
   getIt.registerSingleton<ClientService>(ClientService(env));
-  getIt.registerSingleton<Query>(Query(), dispose: (query) => query.dispose());
+  getIt.registerSingleton<QueryService>(
+    QueryService(getIt<ClientService>(), Query()),
+    dispose: (service) => service.dispose(),
+  );
+  getIt.registerSingleton<ProductsScreenService>(
+    ProductsScreenService(getIt<QueryService>()),
+    dispose: (service) => service.dispose(),
+  );
   runApp(const MyApp());
 }
 
