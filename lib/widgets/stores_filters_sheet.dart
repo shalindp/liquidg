@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:liquid_glass_easy/liquid_glass_easy.dart'
-    show LiquidGlassSlider, LiquidGlassSwitch, LiquidGlassSwitchLayout;
+import 'package:liquid_glass_easy/liquid_glass_easy.dart' show LiquidGlassSlider, LiquidGlassSwitch, LiquidGlassSwitchLayout;
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
@@ -12,13 +11,7 @@ import '../theme/theme.dart';
 import 'supermarket_logo.dart';
 
 Future<void> showStoresFiltersSheet(BuildContext context) {
-  return showModalBottomSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (context) => const _StoresFiltersSheet(),
-  );
+  return showModalBottomSheet<void>(context: context, useRootNavigator: true, isScrollControlled: true, showDragHandle: true, builder: (context) => const _StoresFiltersSheet());
 }
 
 class _StoresFiltersSheet extends StatelessWidget {
@@ -46,31 +39,17 @@ class _StoresFiltersSheet extends StatelessWidget {
               children: [
                 Text(
                   'Filters',
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: TwFontSize.xl,
-                    fontWeight: TwFontWeight.bold,
-                  ),
+                  style: TextStyle(color: colors.textPrimary, fontSize: TwFontSize.xl, fontWeight: TwFontWeight.bold),
                 ).expanded(),
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 160),
                   opacity: active ? 1 : 0,
                   child: IgnorePointer(
                     ignoring: !active,
-                    child:
-                        Text(
-                              'Reset',
-                              style: TextStyle(
-                                color: colors.danger,
-                                fontSize: TwFontSize.sm,
-                                fontWeight: TwFontWeight.medium,
-                              ),
-                            )
-                            .padding(vertical: TwSpacing.s2)
-                            .gestures(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: service.resetFilters,
-                            ),
+                    child: Text(
+                      'Reset',
+                      style: TextStyle(color: colors.danger, fontSize: TwFontSize.sm, fontWeight: TwFontWeight.medium),
+                    ).padding(vertical: TwSpacing.s2).gestures(behavior: HitTestBehavior.opaque, onTap: service.resetFilters),
                   ),
                 ),
               ],
@@ -78,17 +57,9 @@ class _StoresFiltersSheet extends StatelessWidget {
             const SizedBox(height: TwSpacing.s5),
             const _SectionHeader(title: 'Supermarkets'),
             const SizedBox(height: TwSpacing.s3),
-            _SupermarketList(
-              filters: filters,
-              counts: counts,
-              radius: radius,
-              service: service,
-            ),
+            _SupermarketList(filters: filters, counts: counts, radius: radius, service: service),
             const SizedBox(height: TwSpacing.s6),
-            _SectionHeader(
-              title: 'Distance',
-              value: radius == null ? '30+ km' : '${radius.round()} km',
-            ),
+            _SectionHeader(title: 'Distance', value: radius == null ? '30+ km' : '${radius.round()} km'),
             const SizedBox(height: TwSpacing.s2),
             LayoutBuilder(
               builder: (context, constraints) => LiquidGlassSlider(
@@ -100,13 +71,7 @@ class _StoresFiltersSheet extends StatelessWidget {
                 onChanged: (value) => service.setRadius(value.roundToDouble()),
               ),
             ),
-            Row(
-              children: [
-                _EndLabel('${StoresScreenService.minRadiusKm.round()} km'),
-                const Spacer(),
-                _EndLabel('${StoresScreenService.maxRadiusKm.round()}+ km'),
-              ],
-            ),
+            Row(children: [_EndLabel('${StoresScreenService.minRadiusKm.round()} km'), const Spacer(), _EndLabel('${StoresScreenService.maxRadiusKm.round()}+ km')]),
             const SizedBox(height: TwSpacing.s6),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -114,22 +79,13 @@ class _StoresFiltersSheet extends StatelessWidget {
                 backgroundColor: BrandColors.accent500,
                 foregroundColor: colors.textOnAccent,
                 minimumSize: const Size.fromHeight(TwSpacing.s14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(TwRadius.xl2),
-                ),
-                textStyle: const TextStyle(
-                  fontSize: TwFontSize.base,
-                  fontWeight: TwFontWeight.semibold,
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(TwRadius.xl2)),
+                textStyle: const TextStyle(fontSize: TwFontSize.base, fontWeight: TwFontWeight.semibold),
               ),
               child: Text(count == 1 ? 'Show 1 store' : 'Show $count stores'),
             ),
           ],
-        ).padding(
-          left: TwSpacing.s4,
-          right: TwSpacing.s4,
-          bottom: TwSpacing.s4 + bottomInset,
-        );
+        ).padding(left: TwSpacing.s4, right: TwSpacing.s4, bottom: TwSpacing.s4 + bottomInset);
       },
     );
   }
@@ -150,22 +106,12 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title.toUpperCase(),
-          style: TextStyle(
-            color: colors.textPrimary.withValues(alpha: 0.6),
-            fontSize: TwFontSize.xs,
-            fontWeight: TwFontWeight.semibold,
-            letterSpacing: 0.8,
-          ),
+          style: TextStyle(color: colors.textPrimary.withValues(alpha: 0.6), fontSize: TwFontSize.xs, fontWeight: TwFontWeight.semibold, letterSpacing: 0.8),
         ).expanded(),
         if (value != null)
           Text(
             value!,
-            style: TextStyle(
-              color: colors.textPrimary,
-              fontSize: TwFontSize.xl2,
-              fontWeight: TwFontWeight.bold,
-              height: 1,
-            ),
+            style: TextStyle(color: colors.textPrimary, fontSize: TwFontSize.xl2, fontWeight: TwFontWeight.bold, height: 1),
           ),
       ],
     );
@@ -181,22 +127,13 @@ class _EndLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: TextStyle(
-        color: context.colors.textPrimary.withValues(alpha: 0.6),
-        fontSize: TwFontSize.xs,
-        fontWeight: TwFontWeight.medium,
-      ),
+      style: TextStyle(color: context.colors.textPrimary.withValues(alpha: 0.6), fontSize: TwFontSize.xs, fontWeight: TwFontWeight.medium),
     );
   }
 }
 
 class _SupermarketList extends StatelessWidget {
-  const _SupermarketList({
-    required this.filters,
-    required this.counts,
-    required this.radius,
-    required this.service,
-  });
+  const _SupermarketList({required this.filters, required this.counts, required this.radius, required this.service});
 
   static const double _logo = TwSpacing.s6;
 
@@ -238,36 +175,19 @@ class _SupermarketList extends StatelessWidget {
     ];
     return Column(
       children: [
-        for (var i = 0; i < rows.length; i++) ...[
-          if (i > 0)
-            const SizedBox(height: _StoresFiltersSheet._hairline)
-                .backgroundColor(colors.border),
-          rows[i],
-        ],
+        for (var i = 0; i < rows.length; i++) ...[if (i > 0) const SizedBox(height: _StoresFiltersSheet._hairline).backgroundColor(colors.border), rows[i]],
       ],
-    ).decorated(
-      color: colors.surfaceMuted,
-      borderRadius: BorderRadius.circular(TwRadius.xl2),
-    );
+    ).decorated(color: colors.surfaceMuted, borderRadius: BorderRadius.circular(TwRadius.xl2));
   }
 
   String _count(int count) {
     final noun = count == 1 ? 'store' : 'stores';
-    return radius == null
-        ? '$count $noun'
-        : '$count $noun within ${radius!.round()} km';
+    return radius == null ? '$count $noun' : '$count $noun within ${radius!.round()} km';
   }
 }
 
 class _SupermarketRow extends StatelessWidget {
-  const _SupermarketRow({
-    required this.leading,
-    required this.title,
-    required this.subtitle,
-    required this.value,
-    required this.muted,
-    required this.onChanged,
-  });
+  const _SupermarketRow({required this.leading, required this.title, required this.subtitle, required this.value, required this.muted, required this.onChanged});
 
   static const Duration _animation = Duration(milliseconds: 180);
 
@@ -295,28 +215,20 @@ class _SupermarketRow extends StatelessWidget {
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: colors.textPrimary,
-                  fontSize: TwFontSize.sm,
-                  fontWeight: TwFontWeight.medium,
-                ),
+                style: TextStyle(color: colors.textPrimary, fontSize: TwFontSize.sm, fontWeight: TwFontWeight.medium),
               ),
               Text(
                 subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: colors.textSecondary,
-                  fontSize: TwFontSize.xs,
-                ),
+                style: TextStyle(color: colors.textSecondary, fontSize: TwFontSize.xs),
               ),
             ],
           ).expanded(),
           LiquidGlassSwitch(
             value: value,
             activeColor: BrandColors.accent500,
-            layout: const LiquidGlassSwitchLayout().scaled(0.85),
-            width: 46,
+            layout: const LiquidGlassSwitchLayout(width: 52, height: 27, thumbWidth: 32, thumbHeight: 23, expandedThumbWidth: 50, expandedThumbHeight: 38, pinchedHeight: 21),
             onChanged: onChanged,
           ),
         ],
