@@ -1,7 +1,7 @@
 import 'package:signals_flutter/signals_flutter.dart';
 
 import '../../models/product_item.dart';
-import '../../services/product_card_service.dart';
+import '../../services/products_screen_service.dart';
 
 class ProductPrice {
   const ProductPrice({required this.dollars, required this.cents});
@@ -24,7 +24,7 @@ class ProductCardController {
   static const int expandedLimit = 6;
 
   final ProductItem item;
-  final ProductCardService _basket;
+  final ProductsScreenService _basket;
   final StorePrice lowestStore;
   final List<StorePrice> stores;
 

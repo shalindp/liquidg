@@ -14,7 +14,7 @@ import '../../theme/theme.dart';
 import '../../models/product_item.dart';
 import '../../models/supermarket.dart';
 import '../../service_locator.dart';
-import '../../services/product_card_service.dart';
+import '../../services/products_screen_service.dart';
 import 'product_card_controller.dart';
 
 part 'common/product_image.dart';
@@ -36,7 +36,7 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   late final _controller = ProductCardController(
     widget.item,
-    getIt<ProductCardService>(),
+    getIt<ProductsScreenService>(),
   );
 
   @override

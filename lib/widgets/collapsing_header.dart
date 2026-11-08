@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
+import '../service_locator.dart';
+import '../services/products_screen_service.dart';
 import '../theme/theme.dart';
 import 'app_glass_button.dart';
 
@@ -74,6 +77,7 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
     final searchWidth = fieldBox - _button - CollapsingHeader.gap;
 
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         AppGlassButton(
           size: _button,
@@ -124,6 +128,12 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
           width: _button * 2,
           height: CollapsingHeader.height,
         ),
+        const IgnorePointer(child: Center(child: _BasketBadge())).positioned(
+          right: CollapsingHeader.gutter,
+          top: 0,
+          width: _button,
+          height: CollapsingHeader.height,
+        ),
       ],
     ).constrained(width: width, height: CollapsingHeader.height);
   }
@@ -141,6 +151,58 @@ class _Basket extends StatelessWidget {
       width: 22,
       height: 22,
       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    );
+  }
+}
+
+class _BasketBadge extends StatelessWidget {
+  const _BasketBadge();
+
+  static const double _size = 24;
+  static const double _font = 10;
+  static const int _max = 99;
+  static const Offset _offset = Offset(TwSpacing.s3, -TwSpacing.s4);
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final service = getIt<ProductsScreenService>();
+    return SignalBuilder(
+      builder: (context) {
+        final count = service.totalCount.value;
+        if (count == 0) return const SizedBox.shrink();
+        final label = count > _max ? '$_max+' : '$count';
+        return Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  textHeightBehavior: const TextHeightBehavior(
+                    applyHeightToFirstAscent: false,
+                    applyHeightToLastDescent: false,
+                    leadingDistribution: TextLeadingDistribution.even,
+                  ),
+                  style: TextStyle(
+                    letterSpacing: label.length > 1 ? -0.4 : 0,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    color: colors.textOnAccent,
+                    fontSize: _font,
+                    fontWeight: TwFontWeight.bold,
+                    height: 1,
+                  ),
+                ),
+              ),
+            )
+            .padding(horizontal: TwSpacing.s0_5)
+            .constrained(width: _size, height: _size)
+            .decorated(
+              color: BrandColors.accent500,
+              shape: BoxShape.circle,
+              border: Border.all(color: TwColors.white, width: 1.5),
+            )
+            .translate(offset: _offset);
+      },
     );
   }
 }

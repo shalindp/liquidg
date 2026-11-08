@@ -30,7 +30,7 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
     final offset = (dx / itemWidth).floor() - _visibleItems ~/ 2;
     selected.value = (selected.value + offset).clamp(
       1,
-      ProductCardService.maxQuantity,
+      ProductsScreenService.maxQuantity,
     );
   }
 
@@ -119,7 +119,7 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
                         NumberPicker(
                           axis: Axis.horizontal,
                           minValue: 1,
-                          maxValue: ProductCardService.maxQuantity,
+                          maxValue: ProductsScreenService.maxQuantity,
                           value: quantity,
                           itemCount: _visibleItems,
                           itemWidth: itemWidth,

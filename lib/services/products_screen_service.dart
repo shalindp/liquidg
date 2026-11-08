@@ -13,6 +13,7 @@ class ProductsScreenService {
   ProductsScreenService(this._client, this._queries);
 
   static const int pageSize = 8;
+  static const int maxQuantity = 99;
   static const String initialSearchTerm = 'cheese';
   static const Duration searchDebounce = Duration(milliseconds: 350);
   static const int _centsPerDollar = 100;
@@ -52,10 +53,28 @@ class ProductsScreenService {
   final ClientService _client;
   final QueryService _queries;
 
+  final quantities = signal<Map<String, int>>(const {});
+  late final totalCount = computed(
+    () => quantities.value.values.fold(0, (sum, count) => sum + count),
+  );
+
   final products = signal<List<ProductItem>>(const []);
   final loading = signal(false);
   final error = signal<Object?>(null);
   final hasMore = signal(true);
+
+  int quantityOf(String productId) => quantities.value[productId] ?? 0;
+
+  void setQuantity(String productId, int quantity) {
+    final next = quantity.clamp(0, maxQuantity);
+    final updated = {...quantities.value};
+    if (next == 0) {
+      updated.remove(productId);
+    } else {
+      updated[productId] = next;
+    }
+    quantities.value = updated;
+  }
 
   Timer? _debounce;
   String _searchTerm = initialSearchTerm;
@@ -173,6 +192,8 @@ class ProductsScreenService {
     _disposed = true;
     _debounce?.cancel();
     _generation++;
+    totalCount.dispose();
+    quantities.dispose();
     products.dispose();
     loading.dispose();
     error.dispose();
