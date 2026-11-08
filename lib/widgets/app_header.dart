@@ -252,23 +252,26 @@ class _SearchField extends StatelessWidget {
               listenable: controller,
               builder: (context, _) => controller.text.isEmpty
                   ? const SizedBox.shrink()
-                  : IconButton(
-                      onPressed: () {
-                        controller.clear();
-                        onChanged?.call('');
-                      },
-                      visualDensity: VisualDensity.compact,
-                      style: IconButton.styleFrom(
-                        overlayColor: Colors.transparent,
-                        splashFactory: NoSplash.splashFactory,
-                      ),
-                      icon: SvgPicture.asset(
-                        'assets/icons/clear.svg',
-                        width: 20,
-                        height: 20,
-                        colorFilter: ColorFilter.mode(
-                          colors.textSecondary,
-                          BlendMode.srcIn,
+                  : TextFieldTapRegion(
+                      child: IconButton(
+                        onPressed: () {
+                          controller.clear();
+                          onChanged?.call('');
+                          focusNode.requestFocus();
+                        },
+                        visualDensity: VisualDensity.compact,
+                        style: IconButton.styleFrom(
+                          overlayColor: Colors.transparent,
+                          splashFactory: NoSplash.splashFactory,
+                        ),
+                        icon: SvgPicture.asset(
+                          'assets/icons/clear.svg',
+                          width: 20,
+                          height: 20,
+                          colorFilter: ColorFilter.mode(
+                            colors.textSecondary,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),

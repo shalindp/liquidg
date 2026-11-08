@@ -2,22 +2,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:liquid_glass_easy/liquid_glass_easy.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../../models/store_location.dart';
-import '../../models/supermarket.dart';
 import '../../nav/nav_metrics.dart';
 import '../../service_locator.dart';
 import '../../services/stores_screen_service.dart';
 import '../../theme/theme.dart';
 import '../../utils/geo_util.dart';
+import '../app_glass_button.dart';
 import '../supermarket_logo.dart';
 
 part 'common/error_state.dart';
-part 'common/filter_bar.dart';
 part 'common/notice.dart';
 part 'common/recenter_button.dart';
 part 'common/search_results.dart';

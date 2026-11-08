@@ -1,13 +1,21 @@
-part of '../stores_map.dart';
+import 'package:flutter/material.dart';
+import 'package:hugeicons/hugeicons.dart';
+import 'package:styled_widget/styled_widget.dart';
 
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({
+import '../models/supermarket.dart';
+import '../theme/theme.dart';
+import 'supermarket_logo.dart';
+
+class StoresFilterBar extends StatelessWidget {
+  const StoresFilterBar({
+    super.key,
     required this.filters,
     required this.onToggle,
     required this.onClear,
   });
 
   static const double height = TwSpacing.s10;
+  static const double _hairline = 0.5;
   static const double _logo = TwSpacing.s5;
   static const double _tick = TwSpacing.s4;
   static const Duration _animation = Duration(milliseconds: 200);
@@ -96,7 +104,12 @@ class _FilterBar extends StatelessWidget {
                 color: colors.surface,
                 borderRadius: BorderRadius.circular(TwRadius.full),
                 border: Border.all(color: colors.border, width: _hairline),
-                boxShadow: _panel(colors).boxShadow,
+                boxShadow: [
+                  BoxShadow(
+                    color: colors.textPrimary.withValues(alpha: 0.08),
+                    blurRadius: TwSpacing.s2,
+                  ),
+                ],
               )
               .gestures(behavior: HitTestBehavior.opaque, onTap: onTap),
     );

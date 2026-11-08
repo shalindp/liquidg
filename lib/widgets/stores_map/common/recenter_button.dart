@@ -9,25 +9,19 @@ class _RecenterButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Semantics(
       label: 'Recenter on my location',
       button: true,
-      child:
-          HugeIcon(
-                icon: HugeIcons.strokeRoundedGps01,
-                color: colors.textPrimary,
-                size: TwSpacing.s6,
-              )
-              .center()
-              .constrained(width: size, height: size)
-              .decorated(
-                color: colors.surface,
-                shape: BoxShape.circle,
-                border: Border.all(color: colors.border, width: _hairline),
-                boxShadow: _panel(colors).boxShadow,
-              )
-              .gestures(behavior: HitTestBehavior.opaque, onTap: onTap),
+      child: AppGlassButton(
+        size: size,
+        folded: true,
+        onPressed: onTap,
+        child: HugeIcon(
+          icon: HugeIcons.strokeRoundedGps01,
+          color: context.colors.textPrimary,
+          size: TwSpacing.s6,
+        ),
+      ),
     );
   }
 }

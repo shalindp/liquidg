@@ -18,7 +18,6 @@ class _SelectedTray extends StatelessWidget {
   static const int _maxAvatars = 3;
   static const double _rowLogo = 28;
   static const double _icon = TwSpacing.s5;
-  static const Duration _animation = Duration(milliseconds: 200);
 
   final List<StoreDistance> entries;
   final bool expanded;
@@ -26,47 +25,65 @@ class _SelectedTray extends StatelessWidget {
   final ValueChanged<StoreLocation> onRemove;
   final VoidCallback onReset;
 
+  static const double boxHeight = _expandedHeader + _listMaxHeight + _hairline;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return AnimatedSize(
-          duration: _animation,
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.bottomCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (expanded) ...[
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: _listMaxHeight),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    itemCount: entries.length,
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: _hairline)
-                            .backgroundColor(colors.border),
-                    itemBuilder: (context, index) => _row(
-                      colors,
-                      entries[index],
-                      removable: entries.length > 1,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: _hairline)
-                    .backgroundColor(colors.border),
-              ],
-              _header(colors),
-            ],
+    final brightness = Theme.brightnessOf(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = expanded
+            ? constraints.maxWidth
+            : constraints.maxWidth - _RecenterButton.size - TwSpacing.s3;
+        return LiquidGlassMorph(
+          alignment: Alignment.bottomLeft,
+          width: width,
+          motion: LiquidGlassMorphMotion.calm,
+          style: AppGlass.foldedStyle(brightness).copyWith(
+            shape: LiquidGlassShape.roundedRectangle(
+              cornerRadius: expanded ? TwRadius.xl2 : collapsedHeight / 2,
+            ),
           ),
-        )
-        .decorated(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(TwRadius.xl2),
-          border: Border.all(color: colors.border, width: _hairline),
-          boxShadow: _panel(colors).boxShadow,
-        )
-        .clipRRect(all: TwRadius.xl2);
+          child: expanded
+              ? SizedBox(
+                  key: const ValueKey('expanded'),
+                  width: width,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxHeight: _listMaxHeight,
+                        ),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.zero,
+                          itemCount: entries.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: _hairline)
+                                  .backgroundColor(colors.border),
+                          itemBuilder: (context, index) => _row(
+                            colors,
+                            entries[index],
+                            removable: entries.length > 1,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: _hairline)
+                          .backgroundColor(colors.border),
+                      _header(colors),
+                    ],
+                  ),
+                )
+              : SizedBox(
+                  key: const ValueKey('collapsed'),
+                  width: width,
+                  child: _header(colors),
+                ),
+        );
+      },
+    );
   }
 
   Widget _header(AppColors colors) {

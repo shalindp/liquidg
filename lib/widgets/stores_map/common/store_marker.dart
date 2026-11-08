@@ -1,28 +1,14 @@
 part of '../stores_map.dart';
 
-class _StoreMarker extends StatelessWidget {
-  const _StoreMarker({
+class _StoreMarkerLabel extends StatelessWidget {
+  const _StoreMarkerLabel({
     required this.store,
     required this.kilometres,
-    required this.selected,
     required this.onTap,
   });
 
-  static const double width = 168;
-  static const double height = 104;
-  static const double _badge = 38;
-  static const double _logo = TwSpacing.s6;
-  static const double _tick = TwSpacing.s4;
-  static const double _tickIcon = 11;
-  static const double _tickOffset = -4;
-  static const double _popScale = 0.14;
-  static const double _ring = 2.5;
-  static const double _maxTickScale = 1.3;
-  static const Duration _animation = Duration(milliseconds: 320);
-
   final StoreLocation store;
   final double kilometres;
-  final bool selected;
   final VoidCallback onTap;
 
   void _handleTap() {
@@ -35,7 +21,6 @@ class _StoreMarker extends StatelessWidget {
     final colors = context.colors;
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
-      spacing: TwSpacing.s1,
       children: [
         Column(
               mainAxisSize: MainAxisSize.min,
@@ -70,6 +55,46 @@ class _StoreMarker extends StatelessWidget {
               boxShadow: _panel(colors).boxShadow,
             )
             .gestures(behavior: HitTestBehavior.opaque, onTap: _handleTap),
+        const SizedBox(height: TwSpacing.s1 + _StoreMarkerBadge.size),
+      ],
+    );
+  }
+}
+
+class _StoreMarkerBadge extends StatelessWidget {
+  const _StoreMarkerBadge({
+    required this.store,
+    required this.selected,
+    required this.onTap,
+  });
+
+  static const double width = 168;
+  static const double height = 104;
+  static const double size = 38;
+  static const double _logo = TwSpacing.s6;
+  static const double _tick = TwSpacing.s4;
+  static const double _tickIcon = 11;
+  static const double _tickOffset = -4;
+  static const double _popScale = 0.14;
+  static const double _ring = 2.5;
+  static const double _maxTickScale = 1.3;
+  static const Duration _animation = Duration(milliseconds: 320);
+
+  final StoreLocation store;
+  final bool selected;
+  final VoidCallback onTap;
+
+  void _handleTap() {
+    HapticFeedback.selectionClick();
+    onTap();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
         TweenAnimationBuilder<double>(
           tween: Tween(end: selected ? 1.0 : 0.0),
           duration: _animation,
@@ -81,7 +106,7 @@ class _StoreMarker extends StatelessWidget {
               children: [
                 SupermarketLogo(chain: store.supermarket, size: _logo)
                     .center()
-                    .constrained(width: _badge, height: _badge)
+                    .constrained(width: size, height: size)
                     .decorated(
                       color: colors.surface,
                       shape: BoxShape.circle,
@@ -97,10 +122,14 @@ class _StoreMarker extends StatelessWidget {
                     )
                     .scale(all: 1 + _popScale * value),
                 if (value > 0)
-                  HugeIcon(
-                        icon: HugeIcons.strokeRoundedTick02,
-                        size: _tickIcon,
-                        color: colors.textOnAccent,
+                  SvgPicture.asset(
+                        'assets/icons/star.svg',
+                        width: _tickIcon,
+                        height: _tickIcon,
+                        colorFilter: ColorFilter.mode(
+                          colors.textOnAccent,
+                          BlendMode.srcIn,
+                        ),
                       )
                       .center()
                       .constrained(width: _tick, height: _tick)

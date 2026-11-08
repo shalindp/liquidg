@@ -7,11 +7,10 @@ import 'package:styled_widget/styled_widget.dart';
 
 import '../service_locator.dart';
 import '../services/products_screen_service.dart';
-import '../services/stores_screen_service.dart';
 import '../theme/theme.dart';
 import '../widgets/chrome_collapse_controller.dart';
-import '../widgets/app_header.dart';
 import '../widgets/collapsing_header.dart';
+import '../widgets/stores_header.dart';
 import '../widgets/status_bar_blur.dart';
 import 'nav_metrics.dart';
 import 'nav_tab.dart';
@@ -108,13 +107,7 @@ class _ShellScreenState extends State<ShellScreen> {
                       onChanged: getIt<ProductsScreenService>().onSearchChanged,
                     )
                   : stores
-                  ? AppHeader(
-                      showActions: false,
-                      hintText: 'Search stores',
-                      onChanged: getIt<StoresScreenService>().onSearchChanged,
-                      onFocusChanged:
-                          getIt<StoresScreenService>().searchFocused.set,
-                    )
+                  ? const StoresHeader()
                   : LiquidGlassAppBar(
                       title: Text(route.title),
                       width: width - 32,
@@ -137,7 +130,11 @@ class _ShellScreenState extends State<ShellScreen> {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height: CollapsingHeader.heightOf(context) + TwSpacing.s2,
+                    height:
+                        (stores
+                            ? StoresHeader.heightOf(context)
+                            : CollapsingHeader.heightOf(context)) +
+                        TwSpacing.s2,
                   ),
               ],
               body: Stack(

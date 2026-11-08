@@ -69,7 +69,7 @@ class _StoresMapView extends StatelessWidget {
             service.searchFocused.value;
         final trayExpanded = service.trayExpanded.value && !searching;
         final message = service.message.value;
-        final resultsTop = contentTop + _FilterBar.height + TwSpacing.s2;
+        final resultsTop = contentTop;
 
         return LayoutBuilder(
           builder: (context, constraints) {
@@ -105,15 +105,14 @@ class _StoresMapView extends StatelessWidget {
                       markers: [
                         for (final entry in visible)
                           Marker(
-                            key: ValueKey(entry.store.id),
+                            key: ValueKey('badge-${entry.store.id}'),
                             point: entry.store.position,
-                            width: _StoreMarker.width,
-                            height: _StoreMarker.height,
+                            width: _StoreMarkerBadge.width,
+                            height: _StoreMarkerBadge.height,
                             alignment: Alignment.topCenter,
                             rotate: true,
-                            child: _StoreMarker(
+                            child: _StoreMarkerBadge(
                               store: entry.store,
-                              kilometres: entry.kilometres,
                               selected: selectedIds.contains(entry.store.id),
                               onTap: () => service.toggleStore(entry.store),
                             ),
@@ -126,40 +125,49 @@ class _StoresMapView extends StatelessWidget {
                         ),
                       ],
                     ),
+                    MarkerLayer(
+                      markers: [
+                        for (final entry in visible)
+                          Marker(
+                            key: ValueKey('label-${entry.store.id}'),
+                            point: entry.store.position,
+                            width: _StoreMarkerBadge.width,
+                            height: _StoreMarkerBadge.height,
+                            alignment: Alignment.topCenter,
+                            rotate: true,
+                            child: _StoreMarkerLabel(
+                              store: entry.store,
+                              kilometres: entry.kilometres,
+                              onTap: () => service.toggleStore(entry.store),
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
                 if (!trayExpanded)
                   _RecenterButton(onTap: onRecenter)
                       .positioned(right: TwSpacing.s4, bottom: bottom),
-                if (entries.isNotEmpty || message != null)
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (message != null) _Notice(text: message),
-                      if (entries.isNotEmpty)
-                        _SelectedTray(
-                          entries: entries,
-                          expanded: trayExpanded,
-                          onToggle: service.toggleTray,
-                          onRemove: service.toggleStore,
-                          onReset: service.resetSelected,
-                        ).padding(
-                          right: trayExpanded
-                              ? 0
-                              : _RecenterButton.size + TwSpacing.s3,
-                        ),
-                    ],
+                if (message != null)
+                  _Notice(text: message).positioned(
+                    left: TwSpacing.s4,
+                    right: TwSpacing.s4,
+                    bottom:
+                        bottom + _SelectedTray.collapsedHeight + TwSpacing.s2,
+                  ),
+                if (entries.isNotEmpty)
+                  _SelectedTray(
+                    entries: entries,
+                    expanded: trayExpanded,
+                    onToggle: service.toggleTray,
+                    onRemove: service.toggleStore,
+                    onReset: service.resetSelected,
                   ).positioned(
                     left: TwSpacing.s4,
                     right: TwSpacing.s4,
                     bottom: bottom,
+                    height: _SelectedTray.boxHeight,
                   ),
-                _FilterBar(
-                  filters: service.filters.value,
-                  onToggle: service.toggleFilter,
-                  onClear: service.clearFilters,
-                ).positioned(top: contentTop, left: 0, right: 0),
                 if (searching)
                   TextFieldTapRegion(
                     child: _SearchResults(
