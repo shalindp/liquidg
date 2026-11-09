@@ -82,11 +82,15 @@ class _AppHeaderState extends State<AppHeader> {
     final colors = context.colors;
     final width = MediaQuery.sizeOf(context).width;
     final collapsed = widget.collapsed;
-    final leftSide = widget.showActions ? _side : AppHeader.gutter;
-    final rightSide = widget.showActions || widget.trailing != null
+    const leftSide = AppHeader.gutter;
+    final rightSide = widget.showActions
+        ? AppHeader.gutter + 2 * _button + 2 * AppHeader.gap
+        : widget.trailing != null
         ? _side
         : AppHeader.gutter;
     final searchWidth = width - leftSide - rightSide;
+    final barcodeRight =
+        AppHeader.gutter + (collapsed ? 2 * _button : _button) + AppHeader.gap;
 
     return Stack(
       clipBehavior: Clip.none,
@@ -101,7 +105,7 @@ class _AppHeaderState extends State<AppHeader> {
               color: colors.textPrimary,
               size: 22,
             ),
-          ).positioned(left: AppHeader.gutter, top: 0),
+          ).positioned(right: barcodeRight, top: 0),
         if (widget.showActions)
           AppGlassButton(
             size: _button,

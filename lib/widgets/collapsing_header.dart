@@ -4,6 +4,7 @@ import 'package:styled_widget/styled_widget.dart';
 
 import '../theme/theme.dart';
 import 'app_header.dart';
+import 'products_filter_bar.dart';
 
 class CollapsingHeader extends StatefulWidget {
   const CollapsingHeader({
@@ -28,7 +29,11 @@ class CollapsingHeader extends StatefulWidget {
   static const double gap = AppHeader.gap;
   static const Duration collapseDuration = Duration(milliseconds: 160);
 
-  static double heightOf(BuildContext context) => AppHeader.heightOf(context);
+  static const double filterBarExtent =
+      TwSpacing.s1 + ProductsFilterBar.extent + ProductsCountRow.height;
+
+  static double heightOf(BuildContext context) =>
+      AppHeader.heightOf(context) + filterBarExtent;
 
   @override
   State<CollapsingHeader> createState() => _CollapsingHeaderState();
@@ -63,7 +68,7 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
   @override
   Widget build(BuildContext context) {
     final collapsed = widget.collapsed;
-    return AppHeader(
+    final header = AppHeader(
       collapsed: collapsed,
       controller: _controller,
       focusNode: _focus,
@@ -87,6 +92,25 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
             width: _button * 2,
             height: CollapsingHeader.height,
           ),
+    );
+    return SizedBox(
+      width: MediaQuery.sizeOf(context).width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          header,
+          const SizedBox(height: TwSpacing.s1),
+          IgnorePointer(
+            ignoring: collapsed,
+            child: Opacity(
+              opacity: collapsed ? 0 : 1,
+              child: const Column(
+                children: [ProductsFilterBar(), ProductsCountRow()],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

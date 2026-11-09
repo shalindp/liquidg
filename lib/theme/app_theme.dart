@@ -24,6 +24,11 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: c.background,
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: c.background,
+        modalBackgroundColor: c.background,
+        surfaceTintColor: Colors.transparent,
+      ),
       extensions: [c],
     );
   }

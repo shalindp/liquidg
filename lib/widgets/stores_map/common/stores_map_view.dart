@@ -64,6 +64,12 @@ class _StoresMapView extends StatelessWidget {
         final visible = service.visible.value;
         final radius = service.radiusKm.value;
         final selectedIds = service.selectedIds.value;
+        final stacked = [
+          for (final entry in visible)
+            if (!selectedIds.contains(entry.store.id)) entry,
+          for (final entry in visible)
+            if (selectedIds.contains(entry.store.id)) entry,
+        ];
         final entries = service.selectedEntries.value;
         final searching =
             service.query.value.trim().isNotEmpty &&
@@ -121,7 +127,7 @@ class _StoresMapView extends StatelessWidget {
                       ),
                     MarkerLayer(
                       markers: [
-                        for (final entry in visible)
+                        for (final entry in stacked)
                           Marker(
                             key: ValueKey('badge-${entry.store.id}'),
                             point: entry.store.position,
@@ -145,7 +151,7 @@ class _StoresMapView extends StatelessWidget {
                     ),
                     MarkerLayer(
                       markers: [
-                        for (final entry in visible)
+                        for (final entry in stacked)
                           Marker(
                             key: ValueKey('label-${entry.store.id}'),
                             point: entry.store.position,
@@ -156,6 +162,7 @@ class _StoresMapView extends StatelessWidget {
                             child: _StoreMarkerLabel(
                               store: entry.store,
                               kilometres: entry.kilometres,
+                              selected: selectedIds.contains(entry.store.id),
                               onTap: () => service.toggleStore(entry.store),
                             ),
                           ),

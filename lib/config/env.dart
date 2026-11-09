@@ -1,15 +1,30 @@
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
+import 'package:latlong2/latlong.dart';
 
 class Env {
-  const Env._(this.apiBaseUrl);
+  const Env._(this.apiBaseUrl, this.devLocation);
 
   final String apiBaseUrl;
+  final LatLng? devLocation;
 
   static Future<Env> load() async {
     final raw = await rootBundle.loadString('env.json');
     final json = jsonDecode(raw) as Map<String, dynamic>;
-    return Env._(json['API_BASE_URL'] as String);
+    return Env._(
+      json['API_BASE_URL'] as String,
+      _parseLocation(json['DEV_LOCATION'] as String?),
+    );
+  }
+
+  static LatLng? _parseLocation(String? value) {
+    if (value == null) return null;
+    final parts = value.split(',');
+    if (parts.length != 2) return null;
+    final latitude = double.tryParse(parts[0].trim());
+    final longitude = double.tryParse(parts[1].trim());
+    if (latitude == null || longitude == null) return null;
+    return LatLng(latitude, longitude);
   }
 }

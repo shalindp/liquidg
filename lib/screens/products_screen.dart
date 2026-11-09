@@ -9,6 +9,7 @@ import '../services/products_screen_service.dart';
 import '../theme/theme.dart';
 import '../widgets/collapsing_header.dart';
 import '../widgets/product_card/product_card.dart';
+import '../widgets/product_card/product_card_shimmer.dart';
 
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
@@ -28,6 +29,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
     super.initState();
     _scroll.addListener(_onScroll);
     _service.loadMore();
+    _service.loadCategories();
   }
 
   @override
@@ -44,34 +46,33 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final padding = EdgeInsets.fromLTRB(
-      TwSpacing.s4,
-      CollapsingHeader.heightOf(context) + TwSpacing.s3,
-      TwSpacing.s4,
-      TwSpacing.s28 + TwSpacing.s2,
-    );
+    final top = CollapsingHeader.heightOf(context);
+    const bottom = TwSpacing.s28 + TwSpacing.s2;
     return SignalBuilder(
       builder: (context) {
         final products = _service.products.value;
         if (products.isEmpty) {
-          return _Message(
-            padding: padding,
-            loading: _service.loading.value,
-            error: _service.error.value,
-            term: _service.searchTerm,
-            onRetry: _service.refresh,
-          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _Message(
+                loading: _service.loading.value,
+                error: _service.error.value,
+                term: _service.searchTerm,
+                onRetry: _service.refresh,
+              ).expanded(),
+            ],
+          ).padding(top: top, bottom: bottom);
         }
         final footer = _service.loading.value || _service.error.value != null;
-        return ListView.separated(
+        return ListView.builder(
           controller: _scroll,
-          padding: padding,
+          padding: EdgeInsets.only(top: top, bottom: bottom),
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
           scrollCacheExtent: const ScrollCacheExtent.viewport(1),
           itemCount: products.length + (footer ? 1 : 0),
-          separatorBuilder: (_, _) => const SizedBox(height: TwSpacing.s3),
           itemBuilder: (context, i) {
             if (i == products.length) {
               return _Footer(
@@ -80,7 +81,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
               );
             }
             final item = products[i];
-            return ProductCard(key: ValueKey(item.id), item: item);
+            return ProductCard(key: ValueKey(item.id), item: item).padding(
+              left: TwSpacing.s4,
+              right: TwSpacing.s4,
+              bottom: TwSpacing.s3,
+            );
           },
         );
       },
@@ -96,27 +101,29 @@ class _Footer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: error
-          ? TextButton(onPressed: onRetry, child: const Text('Retry'))
-          : const Padding(
-              padding: EdgeInsets.all(TwSpacing.s4),
-              child: CircularProgressIndicator(),
-            ),
+    if (error) {
+      return Center(
+        child: TextButton(onPressed: onRetry, child: const Text('Retry')),
+      );
+    }
+    return const ProductCardShimmer().padding(
+      left: TwSpacing.s4,
+      right: TwSpacing.s4,
+      bottom: TwSpacing.s3,
     );
   }
 }
 
 class _Message extends StatelessWidget {
   const _Message({
-    required this.padding,
     required this.loading,
     required this.error,
     required this.term,
     required this.onRetry,
   });
 
-  final EdgeInsets padding;
+  static const int _shimmerCount = 4;
+
   final bool loading;
   final Object? error;
   final String term;
@@ -126,34 +133,34 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     if (loading) {
-      return Padding(
-        padding: padding,
-        child: const Center(child: CircularProgressIndicator()),
+      return ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        itemCount: _shimmerCount,
+        itemBuilder: (context, i) => const ProductCardShimmer().padding(
+          left: TwSpacing.s4,
+          right: TwSpacing.s4,
+          bottom: TwSpacing.s3,
+        ),
       );
     }
     if (error == null) {
-      return Padding(
-        padding: padding,
-        child: Center(child: _NoResults(term: term)),
-      );
+      return Center(child: _NoResults(term: term));
     }
-    return Padding(
-      padding: padding,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Could not load products',
-              style: TextStyle(
-                color: colors.textSecondary,
-                fontSize: TwFontSize.base,
-              ),
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Could not load products',
+            style: TextStyle(
+              color: colors.textSecondary,
+              fontSize: TwFontSize.base,
             ),
-            const SizedBox(height: TwSpacing.s3),
-            TextButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
+          ),
+          const SizedBox(height: TwSpacing.s3),
+          TextButton(onPressed: onRetry, child: const Text('Retry')),
+        ],
       ),
     );
   }

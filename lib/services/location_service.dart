@@ -14,18 +14,35 @@ class LocationException implements Exception {
 }
 
 class LocationService {
-  LocationService({Location? location}) : _location = location ?? Location();
+  LocationService({Location? location, this.fallback})
+    : _location = location ?? Location();
 
   static const Duration _timeout = Duration(seconds: 15);
+  static const double _nzSouth = -47.6;
+  static const double _nzWest = 165.8;
+  static const double _nzNorth = -33.9;
+  static const double _nzEast = 179.0;
 
   final Location _location;
+  final LatLng? fallback;
+
+  LatLng _resolve(double latitude, double longitude) {
+    final fallback = this.fallback;
+    final inNewZealand =
+        latitude >= _nzSouth &&
+        latitude <= _nzNorth &&
+        longitude >= _nzWest &&
+        longitude <= _nzEast;
+    if (fallback != null && !inNewZealand) return fallback;
+    return LatLng(latitude, longitude);
+  }
 
   Future<LatLng> currentPosition() async {
     try {
       await _ensurePermission();
       await _ensureServiceEnabled();
       final data = await _location.getLocation().timeout(_timeout);
-      return LatLng(data.latitude, data.longitude);
+      return _resolve(data.latitude, data.longitude);
     } on LocationException {
       rethrow;
     } on PlatformException {
@@ -41,7 +58,7 @@ class LocationService {
       await _ensureServiceEnabled();
       final data = await _location.getLastKnownLocation();
       if (data == null) return null;
-      return LatLng(data.latitude, data.longitude);
+      return _resolve(data.latitude, data.longitude);
     } on LocationException {
       rethrow;
     } on PlatformException {

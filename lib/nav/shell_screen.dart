@@ -130,11 +130,9 @@ class _ShellScreenState extends State<ShellScreen> {
                     top: 0,
                     left: 0,
                     right: 0,
-                    height:
-                        (stores
-                            ? StoresHeader.heightOf(context)
-                            : CollapsingHeader.heightOf(context)) +
-                        TwSpacing.s2,
+                    height: stores
+                        ? StoresHeader.heightOf(context) + TwSpacing.s2
+                        : CollapsingHeader.heightOf(context),
                   ),
               ],
               body: Stack(

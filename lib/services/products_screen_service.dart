@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:ominicart_api/ominicart_api.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
+import '../models/product_filters.dart';
 import '../models/product_item.dart';
 import '../models/store_location.dart';
+import '../query/query.dart';
 import 'client_service.dart';
 import 'query_service.dart';
 import 'stores_service.dart';
@@ -38,6 +40,46 @@ class ProductsScreenService {
   final loading = signal(false);
   final error = signal<Object?>(null);
   final hasMore = signal(true);
+  final total = signal<int?>(null);
+
+  final selectedCategoryIds = signal<Set<int>>(const {});
+  final sort = signal(ProductSort.relevance);
+  final viewMode = signal(ProductView.list);
+
+  late final LazyQuery<ProductCategoriesResponse?> _categoriesQuery = _queries
+      .useGetProductCategories();
+  late final categories = computed(
+    () => _categoriesQuery.$data.value?.categories ?? const <ProductCategory>[],
+  );
+  late final activeFilterCount = computed(
+    () =>
+        selectedCategoryIds.value.length +
+        (sort.value == ProductSort.relevance ? 0 : 1),
+  );
+
+  Future<void> loadCategories() async {
+    await _categoriesQuery.trigger();
+  }
+
+  void toggleCategory(int id) {
+    final current = selectedCategoryIds.value;
+    selectedCategoryIds.value = current.contains(id)
+        ? ({...current}..remove(id))
+        : {...current, id};
+  }
+
+  void setCategories(Iterable<int> ids, {required bool on}) {
+    final current = {...selectedCategoryIds.value};
+    on ? current.addAll(ids) : current.removeAll(ids);
+    selectedCategoryIds.value = current;
+  }
+
+  void setSort(ProductSort value) => sort.value = value;
+
+  void resetFilters() {
+    selectedCategoryIds.value = const {};
+    sort.value = ProductSort.relevance;
+  }
 
   int quantityOf(String productId) => quantities.value[productId] ?? 0;
 
@@ -84,6 +126,7 @@ class ProductsScreenService {
     loading.value = false;
     error.value = null;
     hasMore.value = true;
+    total.value = null;
     return loadMore(force: force);
   }
 
@@ -101,6 +144,7 @@ class ProductsScreenService {
     }
     if (_disposed || generation != _generation) return;
     final selected = _stores.applied.value;
+    // TODO: send selectedCategoryIds and sort once the products API accepts them
     final query = _queries.useGetProducts(
       searchTerm: _searchTerm,
       skip: _skip,
@@ -115,6 +159,7 @@ class ProductsScreenService {
         if (failure != null) error.value = failure;
         return;
       }
+      total.value = page.total;
       final received = page.products;
       products.value = [
         ...products.value,
@@ -177,6 +222,13 @@ class ProductsScreenService {
     _debounce?.cancel();
     _generation++;
     totalCount.dispose();
+    activeFilterCount.dispose();
+    categories.dispose();
+    _categoriesQuery.dispose();
+    total.dispose();
+    selectedCategoryIds.dispose();
+    sort.dispose();
+    viewMode.dispose();
     quantities.dispose();
     products.dispose();
     loading.dispose();

@@ -9,6 +9,7 @@ class AppGlassButton extends StatelessWidget {
     required this.child,
     this.onPressed,
     this.size = TwSpacing.s11,
+    this.width,
     this.visible = true,
     this.folded = false,
   });
@@ -16,13 +17,14 @@ class AppGlassButton extends StatelessWidget {
   final Widget child;
   final VoidCallback? onPressed;
   final double size;
+  final double? width;
   final bool visible;
   final bool folded;
 
   @override
   Widget build(BuildContext context) {
     return LiquidGlassButton(
-      width: size,
+      width: width ?? size,
       height: size,
       visibility: visible,
       padding: EdgeInsets.zero,

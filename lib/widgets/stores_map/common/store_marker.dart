@@ -4,11 +4,19 @@ class _StoreMarkerLabel extends StatelessWidget {
   const _StoreMarkerLabel({
     required this.store,
     required this.kilometres,
+    required this.selected,
     required this.onTap,
   });
 
+  static const double _tick = TwSpacing.s4;
+  static const double _tickIcon = 11;
+  static const double _tickOffset = -6;
+  static const double _border = 1.5;
+  static const Duration _animation = Duration(milliseconds: 320);
+
   final StoreLocation store;
   final double kilometres;
+  final bool selected;
   final VoidCallback onTap;
 
   void _handleTap() {
@@ -22,39 +30,76 @@ class _StoreMarkerLabel extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Column(
-              mainAxisSize: MainAxisSize.min,
+        TweenAnimationBuilder<double>(
+          tween: Tween(end: selected ? 1.0 : 0.0),
+          duration: _animation,
+          curve: Curves.easeOutBack,
+          builder: (context, value, _) {
+            final t = value.clamp(0.0, 1.0);
+            return Stack(
+              clipBehavior: Clip.none,
               children: [
-                Text(
-                  store.branch,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: colors.textPrimary,
-                    fontSize: TwFontSize.xs,
-                    fontWeight: TwFontWeight.semibold,
-                  ),
-                ),
-                Text(
-                  GeoUtil.formatKilometres(kilometres),
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: colors.textSecondary,
-                    fontSize: TwFontSize.xs,
-                    fontWeight: TwFontWeight.medium,
-                  ),
-                ),
+                Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          store.branch,
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: colors.textPrimary,
+                            fontSize: TwFontSize.xs,
+                            fontWeight: TwFontWeight.semibold,
+                          ),
+                        ),
+                        Text(
+                          GeoUtil.formatKilometres(kilometres),
+                          maxLines: 1,
+                          style: TextStyle(
+                            color: colors.textSecondary,
+                            fontSize: TwFontSize.xs,
+                            fontWeight: TwFontWeight.medium,
+                          ),
+                        ),
+                      ],
+                    )
+                    .padding(horizontal: TwSpacing.s2_5, vertical: TwSpacing.s1)
+                    .decorated(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(TwRadius.lg),
+                      border: Border.all(
+                        color: Color.lerp(
+                          colors.border,
+                          BrandColors.accent500,
+                          t,
+                        )!,
+                        width: _hairline + (_border - _hairline) * t,
+                      ),
+                      boxShadow: _panel(colors).boxShadow,
+                    ),
+                if (value > 0)
+                  SvgPicture.asset(
+                        'assets/icons/star.svg',
+                        width: _tickIcon,
+                        height: _tickIcon,
+                        colorFilter: ColorFilter.mode(
+                          colors.textOnAccent,
+                          BlendMode.srcIn,
+                        ),
+                      )
+                      .center()
+                      .constrained(width: _tick, height: _tick)
+                      .decorated(
+                        color: BrandColors.accent500,
+                        shape: BoxShape.circle,
+                      )
+                      .scale(all: value.clamp(0.0, 1.3))
+                      .positioned(left: _tickOffset, top: _tickOffset),
               ],
-            )
-            .padding(horizontal: TwSpacing.s2_5, vertical: TwSpacing.s1)
-            .decorated(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(TwRadius.lg),
-              border: Border.all(color: colors.border, width: _hairline),
-              boxShadow: _panel(colors).boxShadow,
-            )
-            .gestures(behavior: HitTestBehavior.opaque, onTap: _handleTap),
+            );
+          },
+        ).gestures(behavior: HitTestBehavior.opaque, onTap: _handleTap),
         const SizedBox(height: TwSpacing.s1 + _StoreMarkerBadge.size),
       ],
     );
@@ -72,12 +117,8 @@ class _StoreMarkerBadge extends StatelessWidget {
   static const double height = 104;
   static const double size = 38;
   static const double _logo = TwSpacing.s6;
-  static const double _tick = TwSpacing.s4;
-  static const double _tickIcon = 11;
-  static const double _tickOffset = -4;
   static const double _popScale = 0.14;
   static const double _ring = 2.5;
-  static const double _maxTickScale = 1.3;
   static const Duration _animation = Duration(milliseconds: 320);
 
   final StoreLocation store;
@@ -121,24 +162,6 @@ class _StoreMarkerBadge extends StatelessWidget {
                       boxShadow: _panel(colors).boxShadow,
                     )
                     .scale(all: 1 + _popScale * value),
-                if (value > 0)
-                  SvgPicture.asset(
-                        'assets/icons/star.svg',
-                        width: _tickIcon,
-                        height: _tickIcon,
-                        colorFilter: ColorFilter.mode(
-                          colors.textOnAccent,
-                          BlendMode.srcIn,
-                        ),
-                      )
-                      .center()
-                      .constrained(width: _tick, height: _tick)
-                      .decorated(
-                        color: BrandColors.accent500,
-                        shape: BoxShape.circle,
-                      )
-                      .scale(all: value.clamp(0.0, _maxTickScale))
-                      .positioned(left: _tickOffset, top: _tickOffset),
               ],
             );
           },

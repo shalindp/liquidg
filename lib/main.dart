@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_glass_easy/liquid_glass_easy.dart';
@@ -33,7 +34,9 @@ Future<void> main() async {
     AuthService(getIt<ClientService>(), getIt<QueryService>()),
     dispose: (service) => service.dispose(),
   );
-  getIt.registerSingleton<LocationService>(LocationService());
+  getIt.registerSingleton<LocationService>(
+    LocationService(fallback: kDebugMode ? env.devLocation : null),
+  );
   getIt.registerSingleton<StoresService>(
     StoresService(getIt<QueryService>()),
     dispose: (service) => service.dispose(),
