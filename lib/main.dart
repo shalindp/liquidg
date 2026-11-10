@@ -12,6 +12,7 @@ import 'service_locator.dart';
 import 'services/auth_service.dart';
 import 'services/barcode_scan_service.dart';
 import 'services/client_service.dart';
+import 'services/device_permission_service.dart';
 import 'services/location_service.dart';
 import 'services/products_screen_service.dart';
 import 'services/query_service.dart';
@@ -35,6 +36,10 @@ Future<void> main() async {
     AuthService(getIt<ClientService>(), getIt<QueryService>()),
     dispose: (service) => service.dispose(),
   );
+  getIt.registerSingleton<DevicePermissionService>(
+    DevicePermissionService(),
+    dispose: (service) => service.dispose(),
+  );
   getIt.registerSingleton<BarcodeScanService>(BarcodeScanService());
   getIt.registerSingleton<LocationService>(
     LocationService(fallback: kDebugMode ? env.devLocation : null),
@@ -52,10 +57,15 @@ Future<void> main() async {
     dispose: (service) => service.dispose(),
   );
   getIt.registerSingleton<StoresScreenService>(
-    StoresScreenService(getIt<StoresService>(), getIt<LocationService>()),
+    StoresScreenService(
+      getIt<StoresService>(),
+      getIt<LocationService>(),
+      getIt<DevicePermissionService>(),
+    ),
     dispose: (service) => service.dispose(),
   );
   await getIt<AuthService>().login();
+  await getIt<DevicePermissionService>().refreshAll();
   runApp(const MyApp());
 }
 

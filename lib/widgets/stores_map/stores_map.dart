@@ -12,10 +12,13 @@ import 'package:styled_widget/styled_widget.dart';
 import '../../models/store_location.dart';
 import '../../nav/nav_metrics.dart';
 import '../../service_locator.dart';
+import '../../services/device_permission_service.dart';
 import '../../services/stores_screen_service.dart';
 import '../../theme/theme.dart';
 import '../../utils/geo_util.dart';
 import '../app_glass_button.dart';
+import '../permission_denied.dart';
+import '../no_perms_view.dart';
 import '../supermarket_logo.dart';
 
 part 'common/error_state.dart';

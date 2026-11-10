@@ -8,6 +8,8 @@ class _StoreMarkerLabel extends StatelessWidget {
     required this.onTap,
   });
 
+  static const String _pinSvg =
+      '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" d="M13.30 18.88 13.84 18.99 14.03 19.00 14.18 18.99 14.37 18.96 14.54 18.91 14.75 18.83 14.90 18.74 15.02 18.66 15.13 18.56 15.24 18.44 15.36 18.28 15.71 17.70 15.96 17.19 16.10 16.80 16.21 16.40 16.29 16.01 16.34 15.57 16.35 15.19 16.34 14.78 16.20 13.12 16.17 12.34 16.18 12.04 16.22 11.79 16.28 11.61 16.38 11.43 16.50 11.29 16.65 11.15 16.86 10.99 17.11 10.83 17.64 10.52 19.82 9.30 20.13 9.11 20.34 8.96 20.58 8.76 20.76 8.54 20.88 8.30 20.97 7.99 20.99 7.83 21.00 7.68 20.96 7.37 20.85 7.00 20.62 6.39 20.44 5.99 20.21 5.58 19.94 5.20 19.65 4.84 19.33 4.50 19.01 4.22 18.66 3.95 18.29 3.72 17.91 3.51 17.53 3.34 16.97 3.14 16.60 3.04 16.40 3.00 16.22 3.00 16.01 3.03 15.81 3.08 15.61 3.16 15.44 3.26 15.29 3.37 15.15 3.51 14.97 3.75 14.75 4.09 13.46 6.40 13.12 6.97 12.94 7.22 12.77 7.42 12.62 7.56 12.45 7.67 12.31 7.73 12.13 7.77 11.93 7.80 11.67 7.81 10.92 7.78 9.39 7.66 9.01 7.64 8.42 7.66 7.85 7.73 7.48 7.82 7.14 7.92 6.81 8.04 6.49 8.19 6.14 8.38 5.70 8.66 5.50 8.81 5.34 8.98 5.20 9.20 5.08 9.49 5.02 9.74 5.00 10.00 5.04 10.31 5.15 10.85 5.28 11.30 5.42 11.75 5.60 12.22 5.81 12.68 6.04 13.13 6.31 13.61 6.59 14.05 6.91 14.50 7.25 14.93 7.61 15.36 7.47 15.47 2.47 20.47 2.38 20.58 2.28 20.78 2.25 21.00 2.26 21.15 2.34 21.35 2.42 21.48 2.58 21.62 2.71 21.69 2.93 21.75 3.15 21.74 3.35 21.66 3.48 21.58 8.53 16.53 8.64 16.39 9.18 16.85 9.74 17.26 10.32 17.64 10.89 17.97 11.50 18.27 12.10 18.52 12.70 18.72 13.30 18.88Z" fill="currentColor"/></svg>';
   static const double _tick = TwSpacing.s4;
   static const double _tickIcon = 11;
   static const double _tickOffset = -6;
@@ -79,8 +81,8 @@ class _StoreMarkerLabel extends StatelessWidget {
                       boxShadow: _panel(colors).boxShadow,
                     ),
                 if (value > 0)
-                  SvgPicture.asset(
-                        'assets/icons/star.svg',
+                  SvgPicture.string(
+                        _pinSvg,
                         width: _tickIcon,
                         height: _tickIcon,
                         colorFilter: ColorFilter.mode(
@@ -95,7 +97,7 @@ class _StoreMarkerLabel extends StatelessWidget {
                         shape: BoxShape.circle,
                       )
                       .scale(all: value.clamp(0.0, 1.3))
-                      .positioned(left: _tickOffset, top: _tickOffset),
+                      .positioned(right: _tickOffset, top: _tickOffset),
               ],
             );
           },

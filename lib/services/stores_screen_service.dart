@@ -6,6 +6,7 @@ import 'package:signals_flutter/signals_flutter.dart';
 import '../models/store_location.dart';
 import '../models/supermarket.dart';
 import '../utils/geo_util.dart';
+import 'device_permission_service.dart';
 import 'location_service.dart';
 import 'stores_service.dart';
 
@@ -20,7 +21,19 @@ enum StoresMapStatus {
 typedef StoreDistance = ({StoreLocation store, double kilometres});
 
 class StoresScreenService {
-  StoresScreenService(this._stores, this._location);
+  StoresScreenService(this._stores, this._location, this._permissions) {
+    _disposePermission = _permissions.statuses.subscribe((_) {
+      final granted = _permissions
+          .statusOf(DevicePermission.location)
+          .isGranted;
+      if (granted &&
+          !_wasGranted &&
+          status.value == StoresMapStatus.permissionDenied) {
+        retry();
+      }
+      _wasGranted = granted;
+    });
+  }
 
   static const Duration searchDebounce = Duration(milliseconds: 350);
   static const double minRadiusKm = 1;
@@ -31,6 +44,9 @@ class StoresScreenService {
 
   final StoresService _stores;
   final LocationService _location;
+  final DevicePermissionService _permissions;
+  late final void Function() _disposePermission;
+  bool _wasGranted = false;
 
   final status = signal(StoresMapStatus.loading);
   final userLocation = signal<LatLng?>(null);
@@ -229,6 +245,7 @@ class StoresScreenService {
 
   void dispose() {
     _disposed = true;
+    _disposePermission();
     _searchTimer?.cancel();
     _messageTimer?.cancel();
     distances.dispose();

@@ -7,19 +7,4 @@ class BarcodeScanService {
     BarcodeFormat.upcA,
     BarcodeFormat.upcE,
   ];
-
-  Future<bool> requestCameraAccess() async {
-    final controller = MobileScannerController(
-      autoStart: false,
-      formats: formats,
-    );
-    try {
-      await controller.start();
-      return true;
-    } on MobileScannerException catch (error) {
-      return error.errorCode != MobileScannerErrorCode.permissionDenied;
-    } finally {
-      await controller.dispose();
-    }
-  }
 }

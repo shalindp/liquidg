@@ -6,11 +6,12 @@ import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../service_locator.dart';
-import '../services/barcode_scan_service.dart';
+import '../services/device_permission_service.dart';
 import '../services/products_screen_service.dart';
 import '../theme/theme.dart';
 import '../widgets/chrome_collapse_controller.dart';
 import '../widgets/barcode_scanner_sheet.dart';
+import '../widgets/permission_denied.dart';
 import '../widgets/collapsing_header.dart';
 import '../widgets/stores_header.dart';
 import '../widgets/status_bar_blur.dart';
@@ -66,7 +67,10 @@ class _ShellScreenState extends State<ShellScreen> {
   }
 
   Future<void> _scanBarcode() async {
-    final granted = await getIt<BarcodeScanService>().requestCameraAccess();
+    final granted = await ensureDevicePermission(
+      context,
+      DevicePermission.camera,
+    );
     if (!granted || !mounted) return;
     final code = await showBarcodeScannerSheet(context);
     if (code == null || !mounted) return;
