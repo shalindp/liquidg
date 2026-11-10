@@ -29,6 +29,13 @@ class _StoresMapView extends StatelessWidget {
       '${_tilePrefix}World_Light_Gray_Base$_tileSuffix';
   static const String _userAgentPackage = 'com.example.uxapp';
 
+  static CameraFit defaultFit(LatLng location, List<StoreDistance> visible) {
+    return CameraFit.bounds(
+      bounds: _initialBounds(location, visible),
+      padding: const EdgeInsets.all(TwSpacing.s8),
+    );
+  }
+
   static LatLngBounds _initialBounds(
     LatLng location,
     List<StoreDistance> visible,
@@ -88,10 +95,7 @@ class _StoresMapView extends StatelessWidget {
                   mapController: mapController,
                   options: MapOptions(
                     initialRotation: 0,
-                    initialCameraFit: CameraFit.bounds(
-                      bounds: _initialBounds(location, visible),
-                      padding: const EdgeInsets.all(TwSpacing.s8),
-                    ),
+                    initialCameraFit: defaultFit(location, visible),
                     minZoom: _minZoom,
                     maxZoom: _maxZoom,
                     cameraConstraint: CameraConstraint.contain(

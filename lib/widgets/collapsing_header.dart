@@ -14,6 +14,7 @@ class CollapsingHeader extends StatefulWidget {
     this.onBarcodeScanPressed,
     this.onBasketPressed,
     this.onChanged,
+    this.controller,
   });
 
   final bool collapsed;
@@ -21,6 +22,7 @@ class CollapsingHeader extends StatefulWidget {
   final VoidCallback? onBarcodeScanPressed;
   final VoidCallback? onBasketPressed;
   final ValueChanged<String>? onChanged;
+  final TextEditingController? controller;
 
   static const double controlSize = AppHeader.controlSize;
   static const double height = AppHeader.height;
@@ -42,7 +44,8 @@ class CollapsingHeader extends StatefulWidget {
 class _CollapsingHeaderState extends State<CollapsingHeader> {
   static const double _button = CollapsingHeader.height;
 
-  final _controller = TextEditingController();
+  late final TextEditingController _controller =
+      widget.controller ?? TextEditingController();
   final _focus = FocusNode();
 
   @override
@@ -53,7 +56,7 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (widget.controller == null) _controller.dispose();
     _focus.dispose();
     super.dispose();
   }

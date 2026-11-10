@@ -6,9 +6,11 @@ import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
 import '../service_locator.dart';
+import '../services/barcode_scan_service.dart';
 import '../services/products_screen_service.dart';
 import '../theme/theme.dart';
 import '../widgets/chrome_collapse_controller.dart';
+import '../widgets/barcode_scanner_sheet.dart';
 import '../widgets/collapsing_header.dart';
 import '../widgets/stores_header.dart';
 import '../widgets/status_bar_blur.dart';
@@ -54,11 +56,22 @@ const double _circle = CollapsingHeader.controlSize;
 
 class _ShellScreenState extends State<ShellScreen> {
   final _chrome = ChromeCollapseController();
+  final _productsSearch = TextEditingController();
 
   @override
   void dispose() {
     _chrome.dispose();
+    _productsSearch.dispose();
     super.dispose();
+  }
+
+  Future<void> _scanBarcode() async {
+    final granted = await getIt<BarcodeScanService>().requestCameraAccess();
+    if (!granted || !mounted) return;
+    final code = await showBarcodeScannerSheet(context);
+    if (code == null || !mounted) return;
+    _productsSearch.text = code;
+    getIt<ProductsScreenService>().search(code);
   }
 
   void _select(int i) {
@@ -103,6 +116,8 @@ class _ShellScreenState extends State<ShellScreen> {
               appBar: products
                   ? CollapsingHeader(
                       collapsed: collapsed,
+                      controller: _productsSearch,
+                      onBarcodeScanPressed: _scanBarcode,
                       onExpand: _chrome.expand,
                       onChanged: getIt<ProductsScreenService>().onSearchChanged,
                     )

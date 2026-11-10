@@ -79,7 +79,10 @@ class _StoresMapState extends State<StoresMap> {
   Future<void> _recenter() async {
     final location = await _service.recenter();
     if (location == null || !mounted) return;
-    _mapController.moveAndRotate(location, _mapController.camera.zoom, 0);
+    _mapController.rotate(0);
+    _mapController.fitCamera(
+      _StoresMapView.defaultFit(location, _service.visible.value),
+    );
   }
 
   @override
