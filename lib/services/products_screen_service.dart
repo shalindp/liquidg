@@ -111,9 +111,8 @@ class ProductsScreenService {
 
   Future<void> search(String term) {
     _debounce?.cancel();
-    final trimmed = term.trim();
-    final next = trimmed.isEmpty ? initialSearchTerm : trimmed;
-    if (next == _searchTerm) return Future.value();
+    final next = term.trim();
+    if (next.isEmpty || next == _searchTerm) return Future.value();
     _searchTerm = next;
     return _reset();
   }

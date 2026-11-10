@@ -71,6 +71,7 @@ class _StoresMapView extends StatelessWidget {
         final visible = service.visible.value;
         final radius = service.radiusKm.value;
         final selectedIds = service.selectedIds.value;
+        final focused = service.focused.value;
         final stacked = [
           for (final entry in visible)
             if (!selectedIds.contains(entry.store.id)) entry,
@@ -96,6 +97,7 @@ class _StoresMapView extends StatelessWidget {
                   options: MapOptions(
                     initialRotation: 0,
                     initialCameraFit: defaultFit(location, visible),
+                    onTap: (_, _) => service.clearFocus(),
                     minZoom: _minZoom,
                     maxZoom: _maxZoom,
                     cameraConstraint: CameraConstraint.contain(
@@ -131,20 +133,6 @@ class _StoresMapView extends StatelessWidget {
                       ),
                     MarkerLayer(
                       markers: [
-                        for (final entry in stacked)
-                          Marker(
-                            key: ValueKey('badge-${entry.store.id}'),
-                            point: entry.store.position,
-                            width: _StoreMarkerBadge.width,
-                            height: _StoreMarkerBadge.height,
-                            alignment: Alignment.topCenter,
-                            rotate: true,
-                            child: _StoreMarkerBadge(
-                              store: entry.store,
-                              selected: selectedIds.contains(entry.store.id),
-                              onTap: () => service.toggleStore(entry.store),
-                            ),
-                          ),
                         Marker(
                           point: location,
                           width: _UserMarker.size,
@@ -157,21 +145,28 @@ class _StoresMapView extends StatelessWidget {
                       markers: [
                         for (final entry in stacked)
                           Marker(
-                            key: ValueKey('label-${entry.store.id}'),
+                            key: ValueKey('badge-${entry.store.id}'),
                             point: entry.store.position,
-                            width: _StoreMarkerBadge.width,
-                            height: _StoreMarkerBadge.height,
-                            alignment: Alignment.topCenter,
+                            width: _StoreMarkerBadge.boxSize,
+                            height: _StoreMarkerBadge.boxSize,
                             rotate: true,
-                            child: _StoreMarkerLabel(
+                            child: _StoreMarkerBadge(
                               store: entry.store,
-                              kilometres: entry.kilometres,
                               selected: selectedIds.contains(entry.store.id),
-                              onTap: () => service.toggleStore(entry.store),
+                              onTap: () => service.focusStore(entry.store),
                             ),
                           ),
                       ],
                     ),
+                    if (focused != null)
+                      _CalloutLayer(
+                        entry: focused,
+                        selected: selectedIds.contains(focused.store.id),
+                        topInset: contentTop,
+                        onToggle: () =>
+                            service.toggleFromCallout(focused.store),
+                        onOffscreen: service.clearFocus,
+                      ),
                   ],
                 ),
                 if (!trayExpanded)

@@ -53,6 +53,7 @@ class StoresScreenService {
   final filters = signal<Set<Supermarket>>(const {});
   final radiusKm = signal<double?>(null);
   final trayExpanded = signal(false);
+  final focusedId = signal<int?>(null);
   final query = signal('');
   final message = signal<String?>(null);
   final searchFocused = signal(false);
@@ -94,6 +95,15 @@ class StoresScreenService {
   late final activeFilterCount = computed(
     () => filters.value.length + (radiusKm.value == null ? 0 : 1),
   );
+
+  late final focused = computed(() {
+    final id = focusedId.value;
+    if (id == null) return null;
+    for (final entry in visible.value) {
+      if (entry.store.id == id) return entry;
+    }
+    return null;
+  });
 
   late final selectedIds = computed(
     () => {for (final store in _stores.selected.value) store.id},
@@ -144,6 +154,21 @@ class StoresScreenService {
   void setQuery(String term) {
     if (_disposed) return;
     query.value = term;
+  }
+
+  void focusStore(StoreLocation store) {
+    if (_disposed) return;
+    focusedId.value = focusedId.value == store.id ? null : store.id;
+  }
+
+  void toggleFromCallout(StoreLocation store) {
+    toggleStore(store);
+    clearFocus();
+  }
+
+  void clearFocus() {
+    if (_disposed) return;
+    if (focusedId.value != null) focusedId.value = null;
   }
 
   void toggleStore(StoreLocation store) {
@@ -250,6 +275,8 @@ class StoresScreenService {
     _messageTimer?.cancel();
     distances.dispose();
     visible.dispose();
+    focused.dispose();
+    focusedId.dispose();
     chainCounts.dispose();
     activeFilterCount.dispose();
     radiusKm.dispose();

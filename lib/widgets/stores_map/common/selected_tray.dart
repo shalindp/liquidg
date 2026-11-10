@@ -89,8 +89,8 @@ class _SelectedTray extends StatelessWidget {
   Widget _header(AppColors colors) {
     final count = entries.length;
     final label = expanded
-        ? 'Selected ($count)'
-        : '$count ${count == 1 ? 'store' : 'stores'} selected';
+        ? 'Shopping at ($count)'
+        : 'Shopping at $count ${count == 1 ? 'store' : 'stores'}';
     return Row(
           spacing: TwSpacing.s2,
           children: [
