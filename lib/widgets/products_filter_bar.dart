@@ -202,7 +202,7 @@ class _FilterButton extends StatelessWidget {
               width: _dot,
               height: _dot,
             ).decorated(color: BrandColors.accent500, shape: BoxShape.circle),
-          ).positioned(top: TwSpacing.px, right: TwSpacing.px),
+          ).positioned(top: TwSpacing.s0_5, right: TwSpacing.s0_5),
       ],
     );
   }

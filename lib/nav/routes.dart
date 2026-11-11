@@ -3,7 +3,8 @@ enum AppRoute {
   products('/products', 'Products'),
   lists('/lists', 'Lists'),
   more('/more', 'More'),
-  features('/more/features', 'Features');
+  features('/more/features', 'Features'),
+  basket('/products/basket', 'Basket');
 
   const AppRoute(this.path, this.title);
 

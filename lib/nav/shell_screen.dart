@@ -122,6 +122,7 @@ class _ShellScreenState extends State<ShellScreen> {
                       collapsed: collapsed,
                       controller: _productsSearch,
                       onBarcodeScanPressed: _scanBarcode,
+                      onBasketPressed: () => context.push(AppRoute.basket.path),
                       onExpand: _chrome.expand,
                       onChanged: getIt<ProductsScreenService>().onSearchChanged,
                     )

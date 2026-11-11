@@ -51,7 +51,7 @@ class ProductCardController {
 
   bool get canExpand => stores.length > collapsedLimit;
 
-  void setQuantity(int value) => _basket.setQuantity(item.id, value);
+  void setQuantity(int value) => _basket.setQuantity(item, value);
 
   void toggleFavourite() => favourite.value = !favourite.value;
 

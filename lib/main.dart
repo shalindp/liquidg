@@ -10,6 +10,7 @@ import 'query/query.dart';
 import 'router.dart';
 import 'service_locator.dart';
 import 'services/auth_service.dart';
+import 'services/basket_screen_service.dart';
 import 'services/barcode_scan_service.dart';
 import 'services/client_service.dart';
 import 'services/device_permission_service.dart';
@@ -54,6 +55,10 @@ Future<void> main() async {
       getIt<QueryService>(),
       getIt<StoresService>(),
     ),
+    dispose: (service) => service.dispose(),
+  );
+  getIt.registerSingleton<BasketScreenService>(
+    BasketScreenService(getIt<ProductsScreenService>(), getIt<StoresService>()),
     dispose: (service) => service.dispose(),
   );
   getIt.registerSingleton<StoresScreenService>(

@@ -81,17 +81,28 @@ class ProductsScreenService {
     sort.value = ProductSort.relevance;
   }
 
+  final basketItems = signal<Map<String, ProductItem>>(const {});
+
   int quantityOf(String productId) => quantities.value[productId] ?? 0;
 
-  void setQuantity(String productId, int quantity) {
+  void setQuantity(ProductItem item, int quantity) {
     final next = quantity.clamp(0, maxQuantity);
     final updated = {...quantities.value};
+    final items = {...basketItems.value};
     if (next == 0) {
-      updated.remove(productId);
+      updated.remove(item.id);
+      items.remove(item.id);
     } else {
-      updated[productId] = next;
+      updated[item.id] = next;
+      items[item.id] = item;
     }
     quantities.value = updated;
+    basketItems.value = items;
+  }
+
+  void clearBasket() {
+    quantities.value = const {};
+    basketItems.value = const {};
   }
 
   late final void Function() _disposeSelection;
@@ -194,9 +205,16 @@ class ProductsScreenService {
       id: product.productId,
       name: product.name.replaceFirst(_leadingNumber, ''),
       packSize: product.packSize,
+      category: _category(product),
       imageUrl: _imageUrl(product),
       stores: stores,
     );
+  }
+
+  String _category(ProductSummary product) {
+    if (product.categories.isEmpty) return 'Other';
+    final top = product.categories.first.split('>').first.trim();
+    return top.isEmpty ? 'Other' : top;
   }
 
   int? _cents(ProductSummary product, int storeId) {
@@ -230,6 +248,7 @@ class ProductsScreenService {
     sort.dispose();
     viewMode.dispose();
     quantities.dispose();
+    basketItems.dispose();
     products.dispose();
     loading.dispose();
     error.dispose();

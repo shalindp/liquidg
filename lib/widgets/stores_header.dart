@@ -51,7 +51,7 @@ class StoresHeader extends StatelessWidget {
                 ),
               );
             },
-          ).positioned(top: TwSpacing.s1, right: TwSpacing.s1),
+          ).positioned(top: TwSpacing.s0_5, right: TwSpacing.s0_5),
         ],
       ),
     );
