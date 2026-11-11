@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hugeicons/hugeicons.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
@@ -44,8 +45,9 @@ class _ProductsFilterBarState extends State<ProductsFilterBar> {
           for (final category in service.categories.value)
             if (category.productCount > 0) category,
         ];
-        final selected = service.selectedCategoryIds.value;
+        final selected = service.selectedCategoryPaths.value;
         final active = service.activeFilterCount.value;
+        final loading = service.categoriesLoading.value;
         return CustomScrollView(
           controller: _scroll,
           scrollDirection: Axis.horizontal,
@@ -87,28 +89,71 @@ class _ProductsFilterBarState extends State<ProductsFilterBar> {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.only(right: TwSpacing.s4),
-              sliver: SliverList.separated(
-                itemCount: categories.length,
-                separatorBuilder: (_, _) => const SizedBox(width: TwSpacing.s2),
-                itemBuilder: (context, i) {
-                  final category = categories[i];
-                  return Align(
-                    alignment: Alignment.bottomCenter,
-                    child: _Chip(
-                      label: category.name,
-                      selected: selected.contains(category.categoryId),
-                      onTap: () => service.toggleCategory(category.categoryId),
-                    ),
-                  );
-                },
+            if (loading)
+              const SliverToBoxAdapter(child: _ChipsShimmer())
+            else
+              SliverPadding(
+                padding: const EdgeInsets.only(right: TwSpacing.s4),
+                sliver: SliverList.separated(
+                  itemCount: categories.length,
+                  separatorBuilder: (_, _) =>
+                      const SizedBox(width: TwSpacing.s2),
+                  itemBuilder: (context, i) {
+                    final category = categories[i];
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: _Chip(
+                        label: category.name,
+                        selected: selected.contains(category.path),
+                        onTap: () => service.toggleCategory(category.path),
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
           ],
         ).constrained(height: ProductsFilterBar.extent);
       },
     );
+  }
+}
+
+class _ChipsShimmer extends StatelessWidget {
+  const _ChipsShimmer();
+
+  static const List<double> _widths = [72, 104, 88, 120, 96, 110];
+  static const Duration _period = Duration(milliseconds: 1400);
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final dark = Theme.brightnessOf(context) == Brightness.dark;
+    final highlight = dark
+        ? TwColors.zinc.s700
+        : Color.lerp(colors.surfaceMuted, colors.surface, 0.55)!;
+    final enabled = !(MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+    return Shimmer.fromColors(
+          baseColor: colors.surfaceMuted,
+          highlightColor: highlight,
+          period: _period,
+          enabled: enabled,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            spacing: TwSpacing.s2,
+            children: [
+              for (final width in _widths)
+                SizedBox(
+                  width: width,
+                  height: ProductsFilterBar.height,
+                ).decorated(
+                  color: colors.surfaceMuted,
+                  borderRadius: BorderRadius.circular(TwRadius.full),
+                ),
+            ],
+          ),
+        )
+        .padding(right: TwSpacing.s4)
+        .constrained(height: ProductsFilterBar.extent);
   }
 }
 

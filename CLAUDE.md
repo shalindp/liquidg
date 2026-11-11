@@ -6,7 +6,7 @@
 3. All theme code lives in `lib/theme/`. Import it through `lib/theme/theme.dart`.
 4. Colour, spacing and radius tokens come from Tailwind: `TwColors`, `TwSpacing`, `TwRadius`. Do not hard-code hex colours or magic numbers where a token exists.
 5. Colours that must follow light/dark mode come from `context.colors` (`AppColors`) or the Mix colour tokens (`$background`, `$accent`, ...). Raw `TwColors` values are static and do not switch with the mode.
-6. Theme mode defaults to `ThemeMode.system`. `themeController` in `lib/main.dart` overrides it.
+6. Theme mode defaults to `ThemeMode.light` (system mode is disabled for now, see TODO.md). `themeController` in `lib/main.dart` overrides it.
 7. Style widgets with Mix (`BoxStyler`, `TextStyler`, tokens from `lib/theme/mix_tokens.dart`) where it fits.
 7a. `styled_widget` chaining (`.padding()`, `.positioned()`, `.constrained()`, `.decorated()`, `.gestures()`...) is also used for layout and decoration. App state lives in `signals_flutter` signals, read in the UI with `SignalBuilder` (not the deprecated `Watch`). Flutter-owned objects such as `TextEditingController` and `FocusNode` stay as they are.
 8. Navigation uses `go_router`, configured in `lib/router.dart`. Tabs are a `StatefulShellRoute.indexedStack` so each tab keeps its state. Tabs: stores, products, lists, more. `more` has the sub route `features`.

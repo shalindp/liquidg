@@ -23,6 +23,7 @@ class ProductsScreenService {
   static const int maxQuantity = 99;
   static const String initialSearchTerm = 'cheese';
   static const Duration searchDebounce = Duration(milliseconds: 350);
+  static const Duration categoryDebounce = Duration(milliseconds: 300);
   static const int _centsPerDollar = 100;
   static final RegExp _leadingNumber = RegExp(r'^#\d+\s*');
   static final RegExp _primaryImage = RegExp(r'_1\.webp$');
@@ -42,18 +43,23 @@ class ProductsScreenService {
   final hasMore = signal(true);
   final total = signal<int?>(null);
 
-  final selectedCategoryIds = signal<Set<int>>(const {});
+  final selectedCategoryPaths = signal<Set<String>>(const {});
   final sort = signal(ProductSort.relevance);
   final viewMode = signal(ProductView.list);
 
   late final LazyQuery<ProductCategoriesResponse?> _categoriesQuery = _queries
       .useGetProductCategories();
+  late final categoriesLoading = computed(
+    () =>
+        _categoriesQuery.$data.value == null &&
+        _categoriesQuery.$error.value == null,
+  );
   late final categories = computed(
     () => _categoriesQuery.$data.value?.categories ?? const <ProductCategory>[],
   );
   late final activeFilterCount = computed(
     () =>
-        selectedCategoryIds.value.length +
+        selectedCategoryPaths.value.length +
         (sort.value == ProductSort.relevance ? 0 : 1),
   );
 
@@ -61,24 +67,32 @@ class ProductsScreenService {
     await _categoriesQuery.trigger();
   }
 
-  void toggleCategory(int id) {
-    final current = selectedCategoryIds.value;
-    selectedCategoryIds.value = current.contains(id)
-        ? ({...current}..remove(id))
-        : {...current, id};
+  void toggleCategory(String id) {
+    final current = selectedCategoryPaths.value;
+    _applyCategories(
+      current.contains(id) ? ({...current}..remove(id)) : {...current, id},
+    );
   }
 
-  void setCategories(Iterable<int> ids, {required bool on}) {
-    final current = {...selectedCategoryIds.value};
+  void setCategories(Iterable<String> ids, {required bool on}) {
+    final current = {...selectedCategoryPaths.value};
     on ? current.addAll(ids) : current.removeAll(ids);
-    selectedCategoryIds.value = current;
+    _applyCategories(current);
+  }
+
+  void _applyCategories(Set<String> next) {
+    selectedCategoryPaths.value = next;
+    _categoryTimer?.cancel();
+    _categoryTimer = Timer(categoryDebounce, () {
+      if (!_disposed) _reset();
+    });
   }
 
   void setSort(ProductSort value) => sort.value = value;
 
   void resetFilters() {
-    selectedCategoryIds.value = const {};
     sort.value = ProductSort.relevance;
+    if (selectedCategoryPaths.value.isNotEmpty) _applyCategories(const {});
   }
 
   final basketItems = signal<Map<String, ProductItem>>(const {});
@@ -108,6 +122,8 @@ class ProductsScreenService {
   late final void Function() _disposeSelection;
   bool _selectionSeen = false;
   Timer? _debounce;
+  Timer? _categoryTimer;
+  String? _barcode;
   String _searchTerm = initialSearchTerm;
   int _skip = 0;
   int _generation = 0;
@@ -123,8 +139,22 @@ class ProductsScreenService {
   Future<void> search(String term) {
     _debounce?.cancel();
     final next = term.trim();
-    if (next.isEmpty || next == _searchTerm) return Future.value();
+    if (next.isEmpty || (next == _searchTerm && _barcode == null)) {
+      return Future.value();
+    }
     _searchTerm = next;
+    _barcode = null;
+    return _reset();
+  }
+
+  Future<void> searchBarcode(String code) {
+    _debounce?.cancel();
+    final next = code.trim();
+    if (next.isEmpty || (next == _searchTerm && _barcode == next)) {
+      return Future.value();
+    }
+    _searchTerm = next;
+    _barcode = next;
     return _reset();
   }
 
@@ -155,9 +185,12 @@ class ProductsScreenService {
     }
     if (_disposed || generation != _generation) return;
     final selected = _stores.applied.value;
-    // TODO: send selectedCategoryIds and sort once the products API accepts them
+    // TODO: send sort once the products API accepts it
+    final barcode = _barcode;
     final query = _queries.useGetProducts(
-      searchTerm: _searchTerm,
+      searchTerm: barcode == null ? _searchTerm : '',
+      barcode: barcode,
+      categories: selectedCategoryPaths.value.toList(),
       skip: _skip,
       limit: pageSize,
       storeIds: [for (final store in selected) store.id],
@@ -238,13 +271,15 @@ class ProductsScreenService {
     _disposed = true;
     _disposeSelection();
     _debounce?.cancel();
+    _categoryTimer?.cancel();
     _generation++;
     totalCount.dispose();
     activeFilterCount.dispose();
     categories.dispose();
+    categoriesLoading.dispose();
     _categoriesQuery.dispose();
     total.dispose();
-    selectedCategoryIds.dispose();
+    selectedCategoryPaths.dispose();
     sort.dispose();
     viewMode.dispose();
     quantities.dispose();

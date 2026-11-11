@@ -35,7 +35,7 @@ abstract final class AppTheme {
 }
 
 class ThemeController extends ValueNotifier<ThemeMode> {
-  ThemeController([super.value = ThemeMode.system]);
+  ThemeController([super.value = ThemeMode.light]);
 }
 
 extension AppThemeContext on BuildContext {

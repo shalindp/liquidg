@@ -18,9 +18,11 @@ class QueryService {
     required int skip,
     required int limit,
     required List<int> storeIds,
+    String? barcode,
+    List<String> categories = const [],
   }) {
     return _query.useLazyQuery(
-      '$productsKey/$searchTerm/$skip/$limit/${storeIds.join(',')}',
+      '$productsKey/$searchTerm/${barcode ?? ''}/${categories.join('|')}/$skip/$limit/${storeIds.join(',')}',
       () async {
         final response = await _client.api.getProductsApi().getProducts(
           getProductsRequest: GetProductsRequest(
@@ -28,6 +30,8 @@ class QueryService {
             skip: skip,
             limit: limit,
             retailerRegionIds: storeIds,
+            barcode: barcode,
+            categories: categories.isEmpty ? null : categories,
           ),
         );
         return response.data;

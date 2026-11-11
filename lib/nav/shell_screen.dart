@@ -75,7 +75,7 @@ class _ShellScreenState extends State<ShellScreen> {
     final code = await showBarcodeScannerSheet(context);
     if (code == null || !mounted) return;
     _productsSearch.text = code;
-    getIt<ProductsScreenService>().search(code);
+    getIt<ProductsScreenService>().searchBarcode(code);
   }
 
   void _select(int i) {

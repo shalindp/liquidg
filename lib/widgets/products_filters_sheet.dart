@@ -236,7 +236,7 @@ class _FilterPage extends StatelessWidget {
       body: SignalBuilder(
         builder: (context) {
           final sort = service.sort.value;
-          final selected = service.selectedCategoryIds.value.length;
+          final selected = service.selectedCategoryPaths.value.length;
           final view = service.viewMode.value;
           return ListView(
             padding: const EdgeInsets.fromLTRB(
@@ -501,8 +501,8 @@ class _CategoriesPage extends StatelessWidget {
       header: SignalBuilder(
         builder: (context) {
           final list = parent?.children ?? service.categories.value;
-          final ids = [for (final category in list) category.categoryId];
-          final selected = service.selectedCategoryIds.value;
+          final ids = [for (final category in list) category.path];
+          final selected = service.selectedCategoryPaths.value;
           final all = ids.isNotEmpty && ids.every(selected.contains);
           return _SheetHeader(
             leading: _CircleButton(
@@ -521,7 +521,7 @@ class _CategoriesPage extends StatelessWidget {
       body: SignalBuilder(
         builder: (context) {
           final list = parent?.children ?? service.categories.value;
-          final selected = service.selectedCategoryIds.value;
+          final selected = service.selectedCategoryPaths.value;
           if (list.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -538,9 +538,8 @@ class _CategoriesPage extends StatelessWidget {
                   for (final category in list)
                     _CategoryRow(
                       category: category,
-                      selected: selected.contains(category.categoryId),
-                      onToggle: () =>
-                          service.toggleCategory(category.categoryId),
+                      selected: selected.contains(category.path),
+                      onToggle: () => service.toggleCategory(category.path),
                       onOpen: category.children.isEmpty
                           ? null
                           : () => Navigator.of(context).push(
