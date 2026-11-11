@@ -21,10 +21,12 @@ class ProductsScreenService {
 
   static const int pageSize = 8;
   static const int maxQuantity = 99;
-  static const String initialSearchTerm = 'cheese';
+  static const String initialSearchTerm = '';
+  static const Set<String> initialCategories = {'Fruit & Veg'};
   static const Duration searchDebounce = Duration(milliseconds: 350);
   static const Duration categoryDebounce = Duration(milliseconds: 300);
   static const int _centsPerDollar = 100;
+  static final RegExp _barcodePattern = RegExp(r'^\d{8,14}$');
   static final RegExp _leadingNumber = RegExp(r'^#\d+\s*');
   static final RegExp _primaryImage = RegExp(r'_1\.webp$');
 
@@ -124,39 +126,86 @@ class ProductsScreenService {
   Timer? _debounce;
   Timer? _categoryTimer;
   String? _barcode;
+  String? _typedCategory;
   String _searchTerm = initialSearchTerm;
   int _skip = 0;
   int _generation = 0;
   bool _disposed = false;
 
   String get searchTerm => _searchTerm;
+  String? get barcode => _barcode;
 
   void onSearchChanged(String term) {
     _debounce?.cancel();
+    if (term.trim().isEmpty) {
+      search(term);
+      return;
+    }
     _debounce = Timer(searchDebounce, () => search(term));
   }
 
   Future<void> search(String term) {
     _debounce?.cancel();
     final next = term.trim();
-    if (next.isEmpty || (next == _searchTerm && _barcode == null)) {
+    if (_barcodePattern.hasMatch(next)) return searchBarcode(next);
+    final category = _matchCategory(next);
+    if (category != null) {
+      if (category == _typedCategory &&
+          _searchTerm.isEmpty &&
+          _barcode == null) {
+        return Future.value();
+      }
+      _searchTerm = '';
+      _barcode = null;
+      _typedCategory = category;
+      return _reset();
+    }
+    if (next == _searchTerm && _barcode == null && _typedCategory == null) {
       return Future.value();
     }
     _searchTerm = next;
     _barcode = null;
+    _typedCategory = null;
     return _reset();
   }
 
   Future<void> searchBarcode(String code) {
     _debounce?.cancel();
     final next = code.trim();
-    if (next.isEmpty || (next == _searchTerm && _barcode == next)) {
-      return Future.value();
-    }
-    _searchTerm = next;
+    if (next.isEmpty || _barcode == next) return Future.value();
+    _searchTerm = '';
+    _typedCategory = null;
     _barcode = next;
     return _reset();
   }
+
+  List<String> _categoryFilter() {
+    final typed = _typedCategory;
+    final selected = {...selectedCategoryPaths.value, ?typed};
+    if (selected.isNotEmpty) return selected.toList();
+    final searching = _searchTerm.isNotEmpty || _barcode != null;
+    return searching ? const [] : initialCategories.toList();
+  }
+
+  String? _matchCategory(String text) {
+    final key = _categoryKey(text);
+    if (key.isEmpty) return null;
+    String? walk(List<ProductCategory> nodes) {
+      for (final node in nodes) {
+        if (_categoryKey(node.path) == key || _categoryKey(node.name) == key) {
+          return node.path;
+        }
+        final found = walk(node.children);
+        if (found != null) return found;
+      }
+      return null;
+    }
+
+    return walk(categories.value);
+  }
+
+  String _categoryKey(String text) =>
+      text.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
 
   Future<void> refresh() => _reset(force: true);
 
@@ -190,7 +239,7 @@ class ProductsScreenService {
     final query = _queries.useGetProducts(
       searchTerm: barcode == null ? _searchTerm : '',
       barcode: barcode,
-      categories: selectedCategoryPaths.value.toList(),
+      categories: _categoryFilter(),
       skip: _skip,
       limit: pageSize,
       storeIds: [for (final store in selected) store.id],

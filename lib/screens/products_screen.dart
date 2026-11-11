@@ -58,7 +58,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
               _Message(
                 loading: _service.loading.value,
                 error: _service.error.value,
-                term: _service.searchTerm,
+                term: _service.barcode ?? _service.searchTerm,
                 onRetry: _service.refresh,
               ).expanded(),
             ],
@@ -67,7 +67,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         final footer = _service.loading.value || _service.error.value != null;
         return ListView.builder(
           controller: _scroll,
-          padding: EdgeInsets.only(top: top, bottom: bottom),
+          padding: EdgeInsets.only(top: top + TwSpacing.s3, bottom: bottom),
           physics: const BouncingScrollPhysics(
             parent: AlwaysScrollableScrollPhysics(),
           ),
@@ -135,7 +135,7 @@ class _Message extends StatelessWidget {
     if (loading) {
       return ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
+        padding: const EdgeInsets.only(top: TwSpacing.s3),
         itemCount: _shimmerCount,
         itemBuilder: (context, i) => const ProductCardShimmer().padding(
           left: TwSpacing.s4,

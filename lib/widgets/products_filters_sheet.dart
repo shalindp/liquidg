@@ -539,6 +539,7 @@ class _CategoriesPage extends StatelessWidget {
                     _CategoryRow(
                       category: category,
                       selected: selected.contains(category.path),
+                      partialCount: _selectedBelow(category, selected),
                       onToggle: () => service.toggleCategory(category.path),
                       onOpen: category.children.isEmpty
                           ? null
@@ -559,28 +560,40 @@ class _CategoriesPage extends StatelessWidget {
   }
 }
 
+int _selectedBelow(ProductCategory category, Set<String> selected) {
+  var count = 0;
+  for (final child in category.children) {
+    if (selected.contains(child.path)) count++;
+    count += _selectedBelow(child, selected);
+  }
+  return count;
+}
+
 class _CategoryRow extends StatelessWidget {
   const _CategoryRow({
     required this.category,
     required this.selected,
+    required this.partialCount,
     required this.onToggle,
     required this.onOpen,
   });
 
   final ProductCategory category;
   final bool selected;
+  final int partialCount;
   final VoidCallback onToggle;
   final VoidCallback? onOpen;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final partial = !selected && partialCount > 0;
     return Row(
       children: [
         Row(
               spacing: TwSpacing.s3,
               children: [
-                _Check(selected: selected),
+                _Check(selected: selected, partial: partial),
                 Text(
                   '${category.name} (${category.productCount})',
                   maxLines: 1,
@@ -595,6 +608,7 @@ class _CategoryRow extends StatelessWidget {
             )
             .gestures(behavior: HitTestBehavior.opaque, onTap: onToggle)
             .expanded(),
+        if (partial) _CountBadge(count: partialCount),
         if (onOpen != null)
           HugeIcon(
                 icon: HugeIcons.strokeRoundedArrowRight01,
@@ -609,34 +623,69 @@ class _CategoryRow extends StatelessWidget {
 }
 
 class _Check extends StatelessWidget {
-  const _Check({required this.selected});
+  const _Check({required this.selected, this.partial = false});
 
   static const double _size = TwSpacing.s6;
 
   final bool selected;
+  final bool partial;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final filled = selected || partial;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       width: _size,
       height: _size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: selected ? BrandColors.accent500 : colors.surface,
+        color: filled ? BrandColors.accent500 : colors.surface,
         border: Border.all(
-          color: selected ? BrandColors.accent500 : colors.border,
+          color: filled ? BrandColors.accent500 : colors.border,
           width: 1.5,
         ),
       ),
-      child: selected
+      child: filled
           ? HugeIcon(
-              icon: HugeIcons.strokeRoundedTick02,
+              icon: partial
+                  ? HugeIcons.strokeRoundedMinusSign
+                  : HugeIcons.strokeRoundedTick02,
               color: colors.textOnAccent,
               size: TwSpacing.s4,
             )
           : null,
+    );
+  }
+}
+
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Padding(
+      padding: const EdgeInsets.only(left: TwSpacing.s2),
+      child: Container(
+        width: TwSpacing.s6,
+        height: TwSpacing.s6,
+        alignment: Alignment.center,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: BrandColors.accent500,
+        ),
+        child: Text(
+          '$count',
+          style: _text(
+            colors.textOnAccent,
+            TwFontSize.sm,
+            TwFontWeight.semibold,
+          ),
+        ),
+      ),
     );
   }
 }
