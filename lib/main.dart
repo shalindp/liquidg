@@ -46,7 +46,7 @@ Future<void> main() async {
     LocationService(fallback: kDebugMode ? env.devLocation : null),
   );
   getIt.registerSingleton<StoresService>(
-    StoresService(getIt<QueryService>()),
+    StoresService(getIt<QueryService>(), env.defaultStoreIds),
     dispose: (service) => service.dispose(),
   );
   getIt.registerSingleton<ProductsScreenService>(
@@ -70,6 +70,7 @@ Future<void> main() async {
     dispose: (service) => service.dispose(),
   );
   await getIt<AuthService>().login();
+  await getIt<StoresService>().ensureLoaded();
   await getIt<DevicePermissionService>().refreshAll();
   runApp(const MyApp());
 }

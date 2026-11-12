@@ -60,6 +60,17 @@ class _ShellScreenState extends State<ShellScreen> {
   final _productsSearch = TextEditingController();
 
   @override
+  void didUpdateWidget(ShellScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.navigationShell.currentIndex !=
+        widget.navigationShell.currentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _chrome.expand();
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _chrome.dispose();
     _productsSearch.dispose();

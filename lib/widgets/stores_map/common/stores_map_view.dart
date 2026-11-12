@@ -72,6 +72,7 @@ class _StoresMapView extends StatelessWidget {
         final radius = service.radiusKm.value;
         final selectedIds = service.selectedIds.value;
         final focused = service.focused.value;
+        final saving = service.saving.value;
         final stacked = [
           for (final entry in visible)
             if (!selectedIds.contains(entry.store.id)) entry,
@@ -162,6 +163,7 @@ class _StoresMapView extends StatelessWidget {
                       _CalloutLayer(
                         entry: focused,
                         selected: selectedIds.contains(focused.store.id),
+                        saving: saving,
                         topInset: contentTop,
                         onToggle: () =>
                             service.toggleFromCallout(focused.store),

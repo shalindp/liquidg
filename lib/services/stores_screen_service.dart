@@ -57,6 +57,7 @@ class StoresScreenService {
   final query = signal('');
   final message = signal<String?>(null);
   final searchFocused = signal(false);
+  Signal<bool> get saving => _stores.saving;
 
   late final distances = computed(() {
     final location = userLocation.value;
@@ -161,8 +162,9 @@ class StoresScreenService {
     focusedId.value = focusedId.value == store.id ? null : store.id;
   }
 
-  void toggleFromCallout(StoreLocation store) {
-    toggleStore(store);
+  Future<void> toggleFromCallout(StoreLocation store) async {
+    if (_stores.saving.value) return;
+    await toggleStore(store, optimistic: false);
     clearFocus();
   }
 
@@ -171,7 +173,10 @@ class StoresScreenService {
     if (focusedId.value != null) focusedId.value = null;
   }
 
-  void toggleStore(StoreLocation store) {
+  Future<void> toggleStore(
+    StoreLocation store, {
+    bool optimistic = true,
+  }) async {
     if (_disposed) return;
     final current = _stores.selectedIds.value;
     if (current.contains(store.id)) {
@@ -179,13 +184,14 @@ class StoresScreenService {
         _showMessage(minimumStoreMessage);
         return;
       }
-      _stores.select([
+      await _stores.select([
         for (final id in current)
           if (id != store.id) id,
-      ]);
+      ], optimistic: optimistic);
     } else {
-      _stores.select([...current, store.id]);
+      await _stores.select([...current, store.id], optimistic: optimistic);
     }
+    if (_disposed) return;
     if (_stores.selectedIds.value.length <= 1) trayExpanded.value = false;
   }
 

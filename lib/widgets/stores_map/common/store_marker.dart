@@ -91,6 +91,7 @@ class _CalloutLayer extends StatelessWidget {
   const _CalloutLayer({
     required this.entry,
     required this.selected,
+    required this.saving,
     required this.topInset,
     required this.onToggle,
     required this.onOffscreen,
@@ -103,6 +104,7 @@ class _CalloutLayer extends StatelessWidget {
 
   final StoreDistance entry;
   final bool selected;
+  final bool saving;
   final double topInset;
   final VoidCallback onToggle;
   final VoidCallback onOffscreen;
@@ -136,6 +138,7 @@ class _CalloutLayer extends StatelessWidget {
       store: entry.store,
       kilometres: entry.kilometres,
       selected: selected,
+      saving: saving,
       calloutWidth: width,
       caretX: caretX.toDouble(),
       below: below,
@@ -166,6 +169,7 @@ class _StoreCallout extends StatelessWidget {
     required this.store,
     required this.kilometres,
     required this.selected,
+    required this.saving,
     required this.calloutWidth,
     required this.caretX,
     required this.below,
@@ -181,6 +185,7 @@ class _StoreCallout extends StatelessWidget {
   final StoreLocation store;
   final double kilometres;
   final bool selected;
+  final bool saving;
   final double calloutWidth;
   final double caretX;
   final bool below;
@@ -313,29 +318,46 @@ class _StoreCallout extends StatelessWidget {
                 ),
               ],
             ),
-            AnimatedSwitcher(
-              duration: _animation,
-              child: FilledButton(
-                key: ValueKey(selected),
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  onToggle();
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: selected
-                      ? colors.surfaceMuted
-                      : BrandColors.accent500,
-                  foregroundColor: selected
-                      ? colors.danger
-                      : colors.textOnAccent,
-                  minimumSize: const Size.fromHeight(TwSpacing.s11),
-                  shape: const StadiumBorder(),
-                  textStyle: const TextStyle(
-                    fontSize: TwFontSize.sm,
-                    fontWeight: TwFontWeight.semibold,
-                  ),
+            FilledButton(
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                onToggle();
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: selected
+                    ? colors.surfaceMuted
+                    : BrandColors.accent500,
+                foregroundColor: selected ? colors.danger : colors.textOnAccent,
+                minimumSize: const Size.fromHeight(TwSpacing.s11),
+                shape: const StadiumBorder(),
+                textStyle: const TextStyle(
+                  fontSize: TwFontSize.sm,
+                  fontWeight: TwFontWeight.semibold,
                 ),
-                child: Text(selected ? 'Not shopping here' : 'Shop here'),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  AnimatedOpacity(
+                    opacity: saving ? 0 : 1,
+                    duration: _animation,
+                    curve: Curves.easeOut,
+                    child: Text(selected ? 'Not shopping here' : 'Shop here'),
+                  ),
+                  AnimatedOpacity(
+                    opacity: saving ? 1 : 0,
+                    duration: _animation,
+                    curve: Curves.easeIn,
+                    child: SizedBox(
+                      width: TwSpacing.s5,
+                      height: TwSpacing.s5,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: selected ? colors.danger : colors.textOnAccent,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

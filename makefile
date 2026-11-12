@@ -1,6 +1,9 @@
 apk:
 	flutter build apk
-.PHONY: apk dark light auto-theme
+
+web:
+	flutter build web
+.PHONY: apk web dark light auto-theme
 
 dark:
 	adb shell "cmd uimode night yes"

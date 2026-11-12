@@ -8,6 +8,7 @@ class QueryService {
 
   static const String productsKey = 'products/list';
   static const String storesKey = 'stores';
+  static const String selectedStoresKey = 'stores/selected';
   static const String categoriesKey = 'products/categories';
 
   final ClientService _client;
@@ -39,6 +40,26 @@ class QueryService {
     );
   }
 
+  LazyQuery<ProductsResponse?> useGetFeaturedProducts({
+    required int skip,
+    required int limit,
+    required List<int> storeIds,
+  }) {
+    return _query.useLazyQuery(
+      '$productsKey/featured/$skip/$limit/${storeIds.join(',')}',
+      () async {
+        final response = await _client.api.getProductsApi().getFeaturedProducts(
+          getFeaturedProductsRequest: GetFeaturedProductsRequest(
+            skip: skip,
+            limit: limit,
+            retailerRegionIds: storeIds,
+          ),
+        );
+        return response.data;
+      },
+    );
+  }
+
   LazyQuery<ProductCategoriesResponse?> useGetProductCategories() {
     return _query.useLazyQuery(categoriesKey, () async {
       final response = await _client.api
@@ -51,6 +72,13 @@ class QueryService {
   LazyQuery<List<Store>> useGetStores() {
     return _query.useLazyQuery(storesKey, () async {
       final response = await _client.api.getStoresApi().getStores();
+      return response.data ?? const [];
+    });
+  }
+
+  LazyQuery<List<Store>> useGetSelectedStores() {
+    return _query.useLazyQuery(selectedStoresKey, () async {
+      final response = await _client.api.getStoresApi().getSelectedStores();
       return response.data ?? const [];
     });
   }

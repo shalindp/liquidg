@@ -18,6 +18,46 @@ class _PriceRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    if (!controller.hasPrices.value) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        spacing: TwSpacing.s1,
+        children: [
+          Text(
+            'This product is not available at the stores you selected.',
+            style: TextStyle(
+              color: colors.textSecondary,
+              fontSize: TwFontSize.sm,
+            ),
+          ),
+          Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: TwSpacing.s1,
+                children: [
+                  Text(
+                    'Try other stores',
+                    style: const TextStyle(
+                      color: BrandColors.accent500,
+                      fontSize: TwFontSize.sm,
+                      fontWeight: TwFontWeight.semibold,
+                    ),
+                  ),
+                  const HugeIcon(
+                    icon: HugeIcons.strokeRoundedArrowRight01,
+                    color: BrandColors.accent500,
+                    size: TwSpacing.s4,
+                  ),
+                ],
+              )
+              .padding(vertical: TwSpacing.s1)
+              .gestures(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => context.go(AppRoute.stores.path),
+              ),
+        ],
+      ).padding(top: TwSpacing.s1, bottom: TwSpacing.s1);
+    }
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [

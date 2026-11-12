@@ -4,10 +4,11 @@ import 'package:flutter/services.dart';
 import 'package:latlong2/latlong.dart';
 
 class Env {
-  const Env._(this.apiBaseUrl, this.devLocation);
+  const Env._(this.apiBaseUrl, this.devLocation, this.defaultStoreIds);
 
   final String apiBaseUrl;
   final LatLng? devLocation;
+  final List<int> defaultStoreIds;
 
   static Future<Env> load() async {
     final raw = await rootBundle.loadString('env.json');
@@ -15,7 +16,13 @@ class Env {
     return Env._(
       json['API_BASE_URL'] as String,
       _parseLocation(json['DEV_LOCATION'] as String?),
+      _parseIds(json['DEFAULT_STORE_IDS'] as String?),
     );
+  }
+
+  static List<int> _parseIds(String? value) {
+    if (value == null) return const [];
+    return [for (final part in value.split(',')) ?int.tryParse(part.trim())];
   }
 
   static LatLng? _parseLocation(String? value) {

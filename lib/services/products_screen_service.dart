@@ -14,15 +14,13 @@ import 'stores_service.dart';
 class ProductsScreenService {
   ProductsScreenService(this._client, this._queries, this._stores) {
     _disposeSelection = _stores.appliedIds.subscribe((_) {
-      if (_selectionSeen) _reset();
-      _selectionSeen = true;
+      if (_stores.ready.value) _reset();
     });
   }
 
   static const int pageSize = 8;
   static const int maxQuantity = 99;
   static const String initialSearchTerm = '';
-  static const Set<String> initialCategories = {'Fruit & Veg'};
   static const Duration searchDebounce = Duration(milliseconds: 350);
   static const Duration categoryDebounce = Duration(milliseconds: 300);
   static const int _centsPerDollar = 100;
@@ -46,6 +44,7 @@ class ProductsScreenService {
   final total = signal<int?>(null);
 
   final selectedCategoryPaths = signal<Set<String>>(const {});
+  final quickCategory = signal<String?>(null);
   final sort = signal(ProductSort.relevance);
   final viewMode = signal(ProductView.list);
 
@@ -62,6 +61,7 @@ class ProductsScreenService {
   late final activeFilterCount = computed(
     () =>
         selectedCategoryPaths.value.length +
+        (quickCategory.value == null ? 0 : 1) +
         (sort.value == ProductSort.relevance ? 0 : 1),
   );
 
@@ -76,14 +76,20 @@ class ProductsScreenService {
     );
   }
 
+  void selectQuickCategory(String path) {
+    final next = quickCategory.value == path ? null : path;
+    _applyCategories(const {}, quick: next);
+  }
+
   void setCategories(Iterable<String> ids, {required bool on}) {
     final current = {...selectedCategoryPaths.value};
     on ? current.addAll(ids) : current.removeAll(ids);
     _applyCategories(current);
   }
 
-  void _applyCategories(Set<String> next) {
+  void _applyCategories(Set<String> next, {String? quick}) {
     selectedCategoryPaths.value = next;
+    quickCategory.value = quick;
     _categoryTimer?.cancel();
     _categoryTimer = Timer(categoryDebounce, () {
       if (!_disposed) _reset();
@@ -94,7 +100,9 @@ class ProductsScreenService {
 
   void resetFilters() {
     sort.value = ProductSort.relevance;
-    if (selectedCategoryPaths.value.isNotEmpty) _applyCategories(const {});
+    if (selectedCategoryPaths.value.isNotEmpty || quickCategory.value != null) {
+      _applyCategories(const {});
+    }
   }
 
   final basketItems = signal<Map<String, ProductItem>>(const {});
@@ -122,12 +130,27 @@ class ProductsScreenService {
   }
 
   late final void Function() _disposeSelection;
-  bool _selectionSeen = false;
   Timer? _debounce;
   Timer? _categoryTimer;
-  String? _barcode;
-  String? _typedCategory;
-  String _searchTerm = initialSearchTerm;
+  final _termSignal = signal(initialSearchTerm);
+  final _barcodeSignal = signal<String?>(null);
+  final _typedCategorySignal = signal<String?>(null);
+
+  String get _searchTerm => _termSignal.value;
+  set _searchTerm(String value) => _termSignal.value = value;
+  String? get _barcode => _barcodeSignal.value;
+  set _barcode(String? value) => _barcodeSignal.value = value;
+  String? get _typedCategory => _typedCategorySignal.value;
+  set _typedCategory(String? value) => _typedCategorySignal.value = value;
+
+  late final showingFeatured = computed(
+    () =>
+        _termSignal.value.isEmpty &&
+        _barcodeSignal.value == null &&
+        _typedCategorySignal.value == null &&
+        selectedCategoryPaths.value.isEmpty &&
+        quickCategory.value == null,
+  );
   int _skip = 0;
   int _generation = 0;
   bool _disposed = false;
@@ -181,10 +204,12 @@ class ProductsScreenService {
 
   List<String> _categoryFilter() {
     final typed = _typedCategory;
-    final selected = {...selectedCategoryPaths.value, ?typed};
-    if (selected.isNotEmpty) return selected.toList();
-    final searching = _searchTerm.isNotEmpty || _barcode != null;
-    return searching ? const [] : initialCategories.toList();
+    final selected = {
+      ...selectedCategoryPaths.value,
+      ?quickCategory.value,
+      ?typed,
+    };
+    return selected.toList();
   }
 
   String? _matchCategory(String text) {
@@ -236,34 +261,50 @@ class ProductsScreenService {
     final selected = _stores.applied.value;
     // TODO: send sort once the products API accepts it
     final barcode = _barcode;
-    final query = _queries.useGetProducts(
-      searchTerm: barcode == null ? _searchTerm : '',
-      barcode: barcode,
-      categories: _categoryFilter(),
-      skip: _skip,
-      limit: pageSize,
-      storeIds: [for (final store in selected) store.id],
-    );
+    final categoryFilter = _categoryFilter();
+    final featured = showingFeatured.value;
+    final storeIds = [for (final store in selected) store.id];
+    var added = 0;
     try {
-      final page = await query.trigger(force: force);
-      if (_disposed || generation != _generation) return;
-      if (page == null) {
-        final failure = query.$error.value;
-        if (failure != null) error.value = failure;
-        return;
+      while (added < pageSize && hasMore.value) {
+        final query = featured
+            ? _queries.useGetFeaturedProducts(
+                skip: _skip,
+                limit: pageSize,
+                storeIds: storeIds,
+              )
+            : _queries.useGetProducts(
+                searchTerm: barcode == null ? _searchTerm : '',
+                barcode: barcode,
+                categories: categoryFilter,
+                skip: _skip,
+                limit: pageSize,
+                storeIds: storeIds,
+              );
+        try {
+          final page = await query.trigger(force: force);
+          if (_disposed || generation != _generation) return;
+          if (page == null) {
+            final failure = query.$error.value;
+            if (failure != null) error.value = failure;
+            return;
+          }
+          total.value = page.total;
+          final received = page.products;
+          final items = [
+            for (final product in received) ?_toItem(product, selected),
+          ];
+          added += items.length;
+          products.value = [...products.value, ...items];
+          _skip = page.skip + received.length;
+          hasMore.value = received.isNotEmpty && _skip < page.total;
+        } finally {
+          query.dispose();
+        }
       }
-      total.value = page.total;
-      final received = page.products;
-      products.value = [
-        ...products.value,
-        for (final product in received) ?_toItem(product, selected),
-      ];
-      _skip = page.skip + received.length;
-      hasMore.value = received.isNotEmpty && _skip < page.total;
     } catch (failure) {
       if (!_disposed && generation == _generation) error.value = failure;
     } finally {
-      query.dispose();
       if (!_disposed && generation == _generation) loading.value = false;
     }
   }
@@ -280,7 +321,6 @@ class ProductsScreenService {
       );
       (cents == null ? unavailable : priced).add(entry);
     }
-    if (priced.isEmpty) return null;
     priced.sort((a, b) => a.price!.compareTo(b.price!));
     final stores = [...priced, ...unavailable];
     return ProductItem(
@@ -329,6 +369,11 @@ class ProductsScreenService {
     _categoriesQuery.dispose();
     total.dispose();
     selectedCategoryPaths.dispose();
+    quickCategory.dispose();
+    showingFeatured.dispose();
+    _termSignal.dispose();
+    _barcodeSignal.dispose();
+    _typedCategorySignal.dispose();
     sort.dispose();
     viewMode.dispose();
     quantities.dispose();

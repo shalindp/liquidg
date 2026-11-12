@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_svg/flutter_svg.dart';
@@ -22,7 +24,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   static const double _loadMoreThreshold = 2000;
 
   final _service = getIt<ProductsScreenService>();
-  final _scroll = ScrollController();
+  final _scroll = _ProbeController();
 
   @override
   void initState() {
@@ -232,4 +234,36 @@ class _BrandColorMapper extends ColorMapper {
     String attributeName,
     Color color,
   ) => color == from ? to : color;
+}
+
+class _ProbeController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) => _ProbePosition(
+    physics: physics,
+    context: context,
+    oldPosition: oldPosition,
+  );
+}
+
+class _ProbePosition extends ScrollPositionWithSingleContext {
+  _ProbePosition({
+    required super.physics,
+    required super.context,
+    super.oldPosition,
+  });
+
+  @override
+  void correctBy(double correction) {
+    File(
+      '/private/tmp/claude-501/-Users-shalinda---dev-liquidg/930e3cc2-b1d2-46f6-9c6c-6de6f7ca6cf9/scratchpad/probe.log',
+    ).writeAsStringSync(
+      'correctBy ${correction.toStringAsFixed(1)} at ${pixels.toStringAsFixed(1)} max ${maxScrollExtent.toStringAsFixed(1)}\n',
+      mode: FileMode.append,
+    );
+    super.correctBy(correction);
+  }
 }

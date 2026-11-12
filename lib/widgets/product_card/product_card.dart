@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 import 'package:styled_widget/styled_widget.dart';
 
+import '../../nav/routes.dart';
 import '../../theme/theme.dart';
 import '../../models/product_item.dart';
 import '../../models/supermarket.dart';
@@ -51,59 +53,67 @@ class _ProductCardState extends State<ProductCard> {
     final colors = context.colors;
     final c = _controller;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Stack(
-          clipBehavior: Clip.none,
+    return SignalBuilder(
+      builder: (context) {
+        final hasPrices = c.hasPrices.value;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _ProductImage(url: c.imageUrl).constrained(
-                      width: _ProductImage.size,
-                      height: _ProductImage.size,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _TitleRow(name: c.name),
-                        const SizedBox(height: TwSpacing.s0),
-                        _PriceRow(
-                          price: c.lowestPrice,
-                          chain: c.lowestStore.chain,
-                          store: c.lowestStore.branch,
-                          unitPrice: c.unitPrice,
-                          controller: c,
+                        _ProductImage(url: c.imageUrl).constrained(
+                          width: _ProductImage.size,
+                          height: _ProductImage.size,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _TitleRow(name: c.name),
+                            const SizedBox(height: TwSpacing.s0),
+                            _PriceRow(
+                              price: c.lowestPrice,
+                              chain: c.lowestStore.chain,
+                              store: c.lowestStore.branch,
+                              unitPrice: c.unitPrice,
+                              controller: c,
+                            ),
+                          ],
+                        ).padding(left: TwSpacing.s2).expanded(),
+                      ],
+                    )
+                    .padding(all: TwSpacing.s3)
+                    .decorated(
+                      color: colors.surface,
+                      borderRadius: BorderRadius.circular(TwRadius.xl2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.textPrimary.withValues(alpha: 0.04),
+                          blurRadius: TwSpacing.s1_5,
                         ),
                       ],
-                    ).padding(left: TwSpacing.s2).expanded(),
-                  ],
-                )
-                .padding(all: TwSpacing.s3)
-                .decorated(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(TwRadius.xl2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.textPrimary.withValues(alpha: 0.04),
-                      blurRadius: TwSpacing.s1_5,
                     ),
-                  ],
-                ),
-            Positioned(
-              top: TwSpacing.s1_5,
-              right: TwSpacing.s1_5,
-              child: _FavouriteButton(
-                favourite: c.favourite,
-                onPressed: c.toggleFavourite,
-              ),
+                if (hasPrices)
+                  Positioned(
+                    top: TwSpacing.s1_5,
+                    right: TwSpacing.s1_5,
+                    child: _FavouriteButton(
+                      favourite: c.favourite,
+                      onPressed: c.toggleFavourite,
+                    ),
+                  ),
+              ],
             ),
+            if (hasPrices) ...[
+              const SizedBox(height: TwSpacing.s1),
+              _StorePrices(controller: c),
+            ],
           ],
-        ),
-        const SizedBox(height: TwSpacing.s1),
-        _StorePrices(controller: c),
-      ],
+        );
+      },
     );
   }
 }

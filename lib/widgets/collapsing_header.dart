@@ -4,7 +4,7 @@ import 'package:styled_widget/styled_widget.dart';
 
 import '../theme/theme.dart';
 import 'app_header.dart';
-import 'products_filter_bar.dart';
+import 'quick_filters.dart';
 
 class CollapsingHeader extends StatefulWidget {
   const CollapsingHeader({
@@ -32,7 +32,7 @@ class CollapsingHeader extends StatefulWidget {
   static const Duration collapseDuration = Duration(milliseconds: 160);
 
   static const double filterBarExtent =
-      TwSpacing.s1 + ProductsFilterBar.extent + ProductsCountRow.height;
+      TwSpacing.s1 + QuickFilters.extent + ProductsCountRow.height;
 
   static double heightOf(BuildContext context) =>
       AppHeader.heightOf(context) + filterBarExtent;
@@ -108,7 +108,7 @@ class _CollapsingHeaderState extends State<CollapsingHeader> {
             child: Opacity(
               opacity: collapsed ? 0 : 1,
               child: const Column(
-                children: [ProductsFilterBar(), ProductsCountRow()],
+                children: [QuickFilters(), ProductsCountRow()],
               ),
             ),
           ),

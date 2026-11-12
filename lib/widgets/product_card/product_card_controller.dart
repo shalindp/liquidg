@@ -30,9 +30,10 @@ class ProductCardController {
 
   String get name => '${item.name} ${item.packSize}';
   String? get imageUrl => item.imageUrl;
+  late final hasPrices = computed(() => lowestStore.available);
   late final String unitPrice =
       '\$${(lowest / 10).toStringAsFixed(2)} per 100g';
-  late final double lowest = lowestStore.price!;
+  late final double lowest = lowestStore.price ?? 0;
   late final lowestPrice = ProductPrice.of(lowest);
 
   late final quantity = computed(() => _basket.quantityOf(item.id));
@@ -58,6 +59,7 @@ class ProductCardController {
   void toggleStores() => storesExpanded.value = !storesExpanded.value;
 
   void dispose() {
+    hasPrices.dispose();
     quantity.dispose();
     hasQuantity.dispose();
     favourite.dispose();
