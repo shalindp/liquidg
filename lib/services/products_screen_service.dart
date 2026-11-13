@@ -7,12 +7,18 @@ import '../models/product_filters.dart';
 import '../models/product_item.dart';
 import '../models/store_location.dart';
 import '../query/query.dart';
+import 'basket_sync_service.dart';
 import 'client_service.dart';
 import 'query_service.dart';
 import 'stores_service.dart';
 
 class ProductsScreenService {
-  ProductsScreenService(this._client, this._queries, this._stores) {
+  ProductsScreenService(
+    this._client,
+    this._queries,
+    this._stores,
+    this._basketSync,
+  ) {
     _disposeSelection = _stores.appliedIds.subscribe((_) {
       if (_stores.ready.value) _reset();
     });
@@ -31,6 +37,7 @@ class ProductsScreenService {
   final ClientService _client;
   final QueryService _queries;
   final StoresService _stores;
+  final BasketSyncService _basketSync;
 
   final quantities = signal<Map<String, int>>(const {});
   late final totalCount = computed(
@@ -122,11 +129,80 @@ class ProductsScreenService {
     }
     quantities.value = updated;
     basketItems.value = items;
+    _basketSync.schedulePush(updated);
   }
 
   void clearBasket() {
     quantities.value = const {};
     basketItems.value = const {};
+    _basketSync.schedulePush(const {});
+  }
+
+  void resetBasketLocally() {
+    quantities.value = const {};
+    basketItems.value = const {};
+  }
+
+  Future<void> loadBasket() async {
+    final saved = await _basketSync.fetch();
+    if (_disposed || saved.isEmpty) return;
+    await _stores.ensureLoaded();
+    final selected = _stores.applied.value;
+    final storeIds = [for (final store in selected) store.id];
+    final resolved = await Future.wait([
+      for (final entry in saved) _resolveBasketItem(entry, selected, storeIds),
+    ]);
+    if (_disposed) return;
+    final nextQuantities = {...quantities.value};
+    final nextItems = {...basketItems.value};
+    for (var i = 0; i < saved.length; i++) {
+      final id = saved[i].productId;
+      if (nextQuantities.containsKey(id)) continue;
+      nextQuantities[id] = saved[i].quantity;
+      nextItems[id] = resolved[i];
+    }
+    quantities.value = nextQuantities;
+    basketItems.value = nextItems;
+  }
+
+  Future<ProductItem> _resolveBasketItem(
+    BasketItem entry,
+    List<StoreLocation> selected,
+    List<int> storeIds,
+  ) async {
+    if (entry.barcode.isNotEmpty) {
+      final query = _queries.useGetProducts(
+        searchTerm: '',
+        barcode: entry.barcode,
+        skip: 0,
+        limit: pageSize,
+        storeIds: storeIds,
+      );
+      try {
+        final page = await query.trigger();
+        for (final product in page?.products ?? const <ProductSummary>[]) {
+          if (product.productId == entry.productId) {
+            final item = _toItem(product, selected);
+            if (item != null) return item;
+          }
+        }
+      } finally {
+        query.dispose();
+      }
+    }
+    return ProductItem(
+      id: entry.productId,
+      name: entry.name,
+      packSize: entry.packSize,
+      stores: [
+        for (final store in selected)
+          StorePrice(
+            chain: store.supermarket,
+            branch: store.branch,
+            price: null,
+          ),
+      ],
+    );
   }
 
   late final void Function() _disposeSelection;

@@ -6,7 +6,6 @@ import '../../theme/theme.dart';
 
 Future<void> showBasketMoreSheet(
   BuildContext context, {
-  required VoidCallback onCreateList,
   required VoidCallback onRemoveAll,
 }) {
   return showModalBottomSheet<void>(
@@ -14,7 +13,6 @@ Future<void> showBasketMoreSheet(
     useRootNavigator: true,
     showDragHandle: true,
     builder: (sheetContext) => _BasketMoreSheet(
-      onCreateList: onCreateList,
       onRemoveAll: () {
         Navigator.of(sheetContext).pop();
         onRemoveAll();
@@ -24,14 +22,8 @@ Future<void> showBasketMoreSheet(
 }
 
 class _BasketMoreSheet extends StatelessWidget {
-  const _BasketMoreSheet({
-    required this.onCreateList,
-    required this.onRemoveAll,
-  });
+  const _BasketMoreSheet({required this.onRemoveAll});
 
-  static const double _hairline = 0.5;
-
-  final VoidCallback onCreateList;
   final VoidCallback onRemoveAll;
 
   @override
@@ -43,15 +35,6 @@ class _BasketMoreSheet extends StatelessWidget {
       children: [
         Column(
               children: [
-                _Action(
-                  icon: HugeIcons.strokeRoundedTaskAdd01,
-                  label: 'Create list',
-                  color: colors.textPrimary,
-                  onTap: onCreateList,
-                ),
-                const SizedBox(height: _hairline)
-                    .backgroundColor(colors.border)
-                    .padding(left: TwSpacing.s4),
                 _Action(
                   icon: HugeIcons.strokeRoundedDelete02,
                   label: 'Remove all',

@@ -65,6 +65,8 @@ class NoPermsView extends StatelessWidget {
         FilledButton(
           onPressed: onPrimary,
           style: FilledButton.styleFrom(
+            overlayColor: Colors.transparent,
+            splashFactory: NoSplash.splashFactory,
             backgroundColor: BrandColors.accent500,
             foregroundColor: colors.textOnAccent,
             minimumSize: const Size.fromHeight(TwSpacing.s14),
@@ -82,6 +84,8 @@ class NoPermsView extends StatelessWidget {
           TextButton(
             onPressed: onSecondary,
             style: TextButton.styleFrom(
+              overlayColor: Colors.transparent,
+              splashFactory: NoSplash.splashFactory,
               foregroundColor: colors.textSecondary,
               minimumSize: const Size.fromHeight(TwSpacing.s11),
               textStyle: const TextStyle(

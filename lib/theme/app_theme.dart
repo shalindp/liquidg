@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 abstract final class AppTheme {
+  static final ButtonStyle _noFeedback = ButtonStyle(
+    overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+    splashFactory: NoSplash.splashFactory,
+  );
+
   static ThemeData get light => _build(Brightness.light, AppColors.light);
   static ThemeData get dark => _build(Brightness.dark, AppColors.dark);
 
@@ -24,6 +29,15 @@ abstract final class AppTheme {
       brightness: brightness,
       colorScheme: scheme,
       scaffoldBackgroundColor: c.background,
+      splashFactory: NoSplash.splashFactory,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
+      filledButtonTheme: FilledButtonThemeData(style: _noFeedback),
+      textButtonTheme: TextButtonThemeData(style: _noFeedback),
+      outlinedButtonTheme: OutlinedButtonThemeData(style: _noFeedback),
+      elevatedButtonTheme: ElevatedButtonThemeData(style: _noFeedback),
+      iconButtonTheme: IconButtonThemeData(style: _noFeedback),
       bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: c.background,
         modalBackgroundColor: c.background,

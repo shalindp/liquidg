@@ -324,6 +324,8 @@ class _StoreCallout extends StatelessWidget {
                 onToggle();
               },
               style: FilledButton.styleFrom(
+                overlayColor: Colors.transparent,
+                splashFactory: NoSplash.splashFactory,
                 backgroundColor: selected
                     ? colors.surfaceMuted
                     : BrandColors.accent500,

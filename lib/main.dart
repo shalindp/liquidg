@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -17,6 +18,8 @@ import 'services/device_permission_service.dart';
 import 'services/location_service.dart';
 import 'services/products_screen_service.dart';
 import 'services/query_service.dart';
+import 'services/basket_sync_service.dart';
+import 'services/favourites_service.dart';
 import 'services/stores_screen_service.dart';
 import 'services/stores_service.dart';
 import 'theme/theme.dart';
@@ -49,16 +52,30 @@ Future<void> main() async {
     StoresService(getIt<QueryService>(), env.defaultStoreIds),
     dispose: (service) => service.dispose(),
   );
+  getIt.registerSingleton<BasketSyncService>(
+    BasketSyncService(getIt<QueryService>()),
+    dispose: (service) => service.dispose(),
+  );
+  getIt.registerSingleton<FavouritesService>(
+    FavouritesService(getIt<QueryService>()),
+    dispose: (service) => service.dispose(),
+  );
   getIt.registerSingleton<ProductsScreenService>(
     ProductsScreenService(
       getIt<ClientService>(),
       getIt<QueryService>(),
       getIt<StoresService>(),
+      getIt<BasketSyncService>(),
     ),
     dispose: (service) => service.dispose(),
   );
   getIt.registerSingleton<BasketScreenService>(
-    BasketScreenService(getIt<ProductsScreenService>(), getIt<StoresService>()),
+    BasketScreenService(
+      getIt<ProductsScreenService>(),
+      getIt<StoresService>(),
+      getIt<BasketSyncService>(),
+      getIt<QueryService>(),
+    ),
     dispose: (service) => service.dispose(),
   );
   getIt.registerSingleton<StoresScreenService>(
@@ -71,6 +88,8 @@ Future<void> main() async {
   );
   await getIt<AuthService>().login();
   await getIt<StoresService>().ensureLoaded();
+  unawaited(getIt<FavouritesService>().load());
+  unawaited(getIt<ProductsScreenService>().loadBasket());
   await getIt<DevicePermissionService>().refreshAll();
   runApp(const MyApp());
 }

@@ -64,9 +64,7 @@ class _StoresMapView extends StatelessWidget {
       builder: (context) {
         final location = service.userLocation.value;
         if (location == null) {
-          return const Center(
-            child: CircularProgressIndicator(color: BrandColors.accent500),
-          );
+          return const _MapLoading();
         }
         final visible = service.visible.value;
         final radius = service.radiusKm.value;

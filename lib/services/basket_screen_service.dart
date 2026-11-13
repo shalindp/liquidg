@@ -1,7 +1,13 @@
 import 'package:signals_flutter/signals_flutter.dart';
 
 import '../models/product_item.dart';
+import '../query/query.dart';
+import 'basket_sync_service.dart';
+
+import 'package:ominicart_api/ominicart_api.dart';
+
 import 'products_screen_service.dart';
+import 'query_service.dart';
 import 'stores_service.dart';
 
 class BasketLine {
@@ -21,12 +27,20 @@ class BasketGroup {
 }
 
 class BasketScreenService {
-  BasketScreenService(this._products, this._stores);
+  BasketScreenService(this._products, this._stores, this._sync, this._queries);
 
   static const int minQuantity = 1;
 
   final ProductsScreenService _products;
   final StoresService _stores;
+  final BasketSyncService _sync;
+  final QueryService _queries;
+
+  late final Mutation<ShoppingList?, ({String name, List<int> storeIds})>
+  _createList = _queries
+      .useCreateListFromBasket();
+
+  final creating = signal(false);
 
   late final lines = computed(() {
     final quantities = _products.quantities.value;
@@ -77,6 +91,24 @@ class BasketScreenService {
 
   void clear() => _products.clearBasket();
 
+  Future<bool> createList(String name) async {
+    if (creating.value) return false;
+    creating.value = true;
+    try {
+      await _sync.flush();
+      final created = await _createList.mutate((
+        name: name.trim(),
+        storeIds: _stores.selectedIds.value,
+      ));
+      if (created == null) return false;
+      _sync.discardPending();
+      _products.resetBasketLocally();
+      return true;
+    } finally {
+      creating.value = false;
+    }
+  }
+
   void dispose() {
     lines.dispose();
     groups.dispose();
@@ -84,5 +116,7 @@ class BasketScreenService {
     total.dispose();
     savings.dispose();
     storeCount.dispose();
+    creating.dispose();
+    _createList.dispose();
   }
 }

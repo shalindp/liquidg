@@ -173,6 +173,8 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
                   FilledButton(
                     onPressed: () => Navigator.of(context).pop(0),
                     style: FilledButton.styleFrom(
+                      overlayColor: Colors.transparent,
+                      splashFactory: NoSplash.splashFactory,
                       backgroundColor: colors.surfaceMuted,
                       foregroundColor: colors.textPrimary,
                       minimumSize: const Size(0, TwSpacing.s14),
@@ -205,6 +207,8 @@ class _AddToCartSheetState extends State<_AddToCartSheet> {
                       ? () => Navigator.of(context).pop(quantity)
                       : null,
                   style: FilledButton.styleFrom(
+                    overlayColor: Colors.transparent,
+                    splashFactory: NoSplash.splashFactory,
                     backgroundColor: BrandColors.accent500,
                     foregroundColor: colors.textOnAccent,
                     disabledBackgroundColor: colors.surfaceMuted,

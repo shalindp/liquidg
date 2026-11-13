@@ -10,6 +10,8 @@ class QueryService {
   static const String storesKey = 'stores';
   static const String selectedStoresKey = 'stores/selected';
   static const String categoriesKey = 'products/categories';
+  static const String basketKey = 'basket';
+  static const String listsKey = 'lists';
 
   final ClientService _client;
   final Query _query;
@@ -21,9 +23,10 @@ class QueryService {
     required List<int> storeIds,
     String? barcode,
     List<String> categories = const [],
+    bool showFavourites = false,
   }) {
     return _query.useLazyQuery(
-      '$productsKey/$searchTerm/${barcode ?? ''}/${categories.join('|')}/$skip/$limit/${storeIds.join(',')}',
+      '$productsKey/$searchTerm/${barcode ?? ''}/${categories.join('|')}/${showFavourites ? 'fav' : 'all'}/$skip/$limit/${storeIds.join(',')}',
       () async {
         final response = await _client.api.getProductsApi().getProducts(
           getProductsRequest: GetProductsRequest(
@@ -33,11 +36,72 @@ class QueryService {
             retailerRegionIds: storeIds,
             barcode: barcode,
             categories: categories.isEmpty ? null : categories,
+            showFavourites: showFavourites ? true : null,
           ),
         );
         return response.data;
       },
     );
+  }
+
+  LazyQuery<Basket?> useGetBasket() {
+    return _query.useLazyQuery(basketKey, () async {
+      final response = await _client.api.getBasketApi().getBasket();
+      return response.data;
+    });
+  }
+
+  Mutation<Basket?, List<ProductQuantityRequest>> useSetBasket() {
+    return _query.useMutation((List<ProductQuantityRequest> items) async {
+      final response = await _client.api.getBasketApi().setBasket(
+        setBasketRequest: SetBasketRequest(items: items),
+      );
+      return response.data;
+    });
+  }
+
+  Mutation<ShoppingList?, ({String name, List<int> storeIds})>
+  useCreateListFromBasket() {
+    return _query.useMutation((({String name, List<int> storeIds}) args) async {
+      final response = await _client.api.getListsApi().createListFromBasket(
+        createListFromBasketRequest: CreateListFromBasketRequest(
+          name: args.name,
+          storeIds: args.storeIds,
+        ),
+      );
+      return response.data;
+    }, invalidates: [listsKey]);
+  }
+
+  LazyQuery<ListsResponse?> useGetLists() {
+    return _query.useLazyQuery(listsKey, () async {
+      final response = await _client.api.getListsApi().getLists();
+      return response.data;
+    });
+  }
+
+  LazyQuery<ListView?> useGetList(int listId) {
+    return _query.useLazyQuery('$listsKey/$listId', () async {
+      final response = await _client.api.getListsApi().getList(listId: listId);
+      return response.data;
+    });
+  }
+
+  Mutation<void, int> useDeleteList() {
+    return _query.useMutation((int listId) async {
+      await _client.api.getListsApi().deleteList(listId: listId);
+    }, invalidates: [listsKey]);
+  }
+
+  Mutation<FavouritesResponse?, List<String>> useSetFavourites() {
+    return _query.useMutation((List<String> productIds) async {
+      final response = await _client.api.getFavouritesApi().setUserFavourites(
+        setUserFavouritesRequest: SetUserFavouritesRequest(
+          productIds: productIds,
+        ),
+      );
+      return response.data;
+    });
   }
 
   LazyQuery<ProductsResponse?> useGetFeaturedProducts({

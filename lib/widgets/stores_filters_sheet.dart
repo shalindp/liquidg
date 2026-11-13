@@ -111,6 +111,8 @@ class _StoresFiltersSheet extends StatelessWidget {
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               style: FilledButton.styleFrom(
+                overlayColor: Colors.transparent,
+                splashFactory: NoSplash.splashFactory,
                 backgroundColor: BrandColors.accent500,
                 foregroundColor: colors.textOnAccent,
                 minimumSize: const Size.fromHeight(TwSpacing.s14),

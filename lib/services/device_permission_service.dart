@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:signals_flutter/signals_flutter.dart';
@@ -59,6 +60,7 @@ class DevicePermissionService with WidgetsBindingObserver {
   }
 
   Future<DevicePermissionStatus> refresh(DevicePermission permission) async {
+    if (kIsWeb) return statusOf(permission);
     final status = _map(await permission.permission.status);
     _store(permission, status);
     return status;
@@ -85,12 +87,13 @@ class DevicePermissionService with WidgetsBindingObserver {
   }
 
   Future<DevicePermissionStatus> _prompt(DevicePermission permission) async {
+    if (kIsWeb) return DevicePermissionStatus.granted;
     final status = _map(await permission.permission.request());
     _store(permission, status);
     return status;
   }
 
-  Future<bool> openSettings() => ph.openAppSettings();
+  Future<bool> openSettings() async => kIsWeb ? false : ph.openAppSettings();
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

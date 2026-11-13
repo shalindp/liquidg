@@ -3,7 +3,7 @@ apk:
 
 web:
 	flutter build web
-.PHONY: apk web dark light auto-theme
+.PHONY: apk web dev-web dark light auto-theme
 
 dark:
 	adb shell "cmd uimode night yes"
@@ -19,3 +19,6 @@ emulator:
 
 dev:
 	@./tool/dev.sh
+
+dev-web:
+	flutter run -d web-server --web-port=3000 --dart-define-from-file=env.json

@@ -24,6 +24,7 @@ import '../no_perms_view.dart';
 import '../supermarket_logo.dart';
 
 part 'common/error_state.dart';
+part 'common/map_loading.dart';
 part 'common/notice.dart';
 part 'common/recenter_button.dart';
 part 'common/search_results.dart';
@@ -103,9 +104,7 @@ class _StoresMapState extends State<StoresMap> {
       builder: (context) {
         final status = _service.status.value;
         return switch (status) {
-          StoresMapStatus.loading => const Center(
-            child: CircularProgressIndicator(color: BrandColors.accent500),
-          ),
+          StoresMapStatus.loading => const _MapLoading(),
           StoresMapStatus.ready => _StoresMapView(
             service: _service,
             mapController: _mapController,

@@ -180,6 +180,8 @@ class _SeeResults extends StatelessWidget {
         return FilledButton(
               onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
               style: FilledButton.styleFrom(
+                overlayColor: Colors.transparent,
+                splashFactory: NoSplash.splashFactory,
                 backgroundColor: BrandColors.accent500,
                 foregroundColor: colors.textOnAccent,
                 minimumSize: const Size.fromHeight(TwSpacing.s14),

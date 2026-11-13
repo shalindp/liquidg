@@ -1,6 +1,7 @@
 import 'package:signals_flutter/signals_flutter.dart';
 
 import '../../models/product_item.dart';
+import '../../services/favourites_service.dart';
 import '../../services/products_screen_service.dart';
 
 class ProductPrice {
@@ -16,7 +17,7 @@ class ProductPrice {
 }
 
 class ProductCardController {
-  ProductCardController(this.item, this._basket)
+  ProductCardController(this.item, this._basket, this._favourites)
     : lowestStore = item.stores.first,
       stores = item.stores.skip(1).toList(growable: false);
 
@@ -25,6 +26,7 @@ class ProductCardController {
 
   final ProductItem item;
   final ProductsScreenService _basket;
+  final FavouritesService _favourites;
   final StorePrice lowestStore;
   final List<StorePrice> stores;
 
@@ -39,7 +41,7 @@ class ProductCardController {
   late final quantity = computed(() => _basket.quantityOf(item.id));
   late final hasQuantity = computed(() => quantity.value > 0);
 
-  final favourite = signal(false);
+  late final ReadonlySignal<bool> favourite = _favourites.watch(item.id);
   final storesExpanded = signal(false);
 
   late final visibleLimit = computed(
@@ -54,7 +56,7 @@ class ProductCardController {
 
   void setQuantity(int value) => _basket.setQuantity(item, value);
 
-  void toggleFavourite() => favourite.value = !favourite.value;
+  void toggleFavourite() => _favourites.toggle(item.id);
 
   void toggleStores() => storesExpanded.value = !storesExpanded.value;
 

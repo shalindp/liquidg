@@ -188,6 +188,8 @@ class _AddButton extends StatelessWidget {
           child: FilledButton(
             onPressed: () => _openSheet(context),
             style: FilledButton.styleFrom(
+              overlayColor: Colors.transparent,
+              splashFactory: NoSplash.splashFactory,
               backgroundColor: inBasket
                   ? Colors.transparent
                   : BrandColors.accent500,

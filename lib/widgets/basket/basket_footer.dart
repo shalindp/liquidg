@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:styled_widget/styled_widget.dart';
 
+import '../../nav/routes.dart';
 import '../../services/basket_screen_service.dart';
 import '../../theme/theme.dart';
+import 'plan_shop_sheet.dart';
 
 class BasketFooter extends StatelessWidget {
   const BasketFooter({super.key, required this.service});
@@ -74,8 +77,17 @@ class BasketFooter extends StatelessWidget {
             ),
             const SizedBox(height: TwSpacing.s1),
             FilledButton(
-              onPressed: () {},
+              onPressed: () async {
+                final router = GoRouter.of(context);
+                final saved = await showPlanShopSheet(
+                  context,
+                  service: service,
+                );
+                if (saved) router.go(AppRoute.lists.path);
+              },
               style: FilledButton.styleFrom(
+                overlayColor: Colors.transparent,
+                splashFactory: NoSplash.splashFactory,
                 backgroundColor: BrandColors.accent500,
                 foregroundColor: colors.textOnAccent,
                 minimumSize: const Size.fromHeight(TwSpacing.s14),
@@ -87,7 +99,7 @@ class BasketFooter extends StatelessWidget {
                   fontWeight: TwFontWeight.semibold,
                 ),
               ),
-              child: const Text('Checkout'),
+              child: const Text('Plan a shop'),
             ),
           ],
         )

@@ -110,7 +110,6 @@ class _BasketScreenState extends State<BasketScreen> {
                       size: TwSpacing.s12,
                       onPressed: () => showBasketMoreSheet(
                         context,
-                        onCreateList: () {},
                         onRemoveAll: _service.clear,
                       ),
                       child: HugeIcon(

@@ -26,7 +26,7 @@ class _FavouriteButton extends StatelessWidget {
 
   static const double size = _FavouriteIconState._icon;
 
-  final Signal<bool> favourite;
+  final ReadonlySignal<bool> favourite;
   final VoidCallback onPressed;
 
   @override
@@ -41,7 +41,7 @@ class _FavouriteButton extends StatelessWidget {
 class _FavouriteIcon extends StatefulWidget {
   const _FavouriteIcon({required this.favourite});
 
-  final Signal<bool> favourite;
+  final ReadonlySignal<bool> favourite;
 
   @override
   State<_FavouriteIcon> createState() => _FavouriteIconState();
